@@ -103,6 +103,21 @@ See `reports/deep_ml_findings.md` for the current gate decision. The online
 weighting rule may use only realized returns before each signal month; it never
 uses the current or later holdout return.
 
+The forecast-stacking experiment combines the completed Chronos, TimesFM,
+Kronos, and factor-MLP forecast panels with the existing composite. It tests a
+regularized Ridge stacker, shallow LightGBM stacker, and fixed rank blends using
+an expanding walk-forward fit. Run it after the two forecast files exist:
+
+```bash
+PYTHONPATH=$PWD /tmp/beat-market-ml-venv/bin/python -m src.stacked_research
+```
+
+See `reports/stacked_model_findings.md` for the paper basis, missing-forecast
+coverage, cost stress, block bootstrap, and fixed audit gate. A passing
+historical candidate is not promoted automatically: the current IDX30 panel
+still has survivorship bias and the app's full ticker catalog is not a
+point-in-time all-stock research universe.
+
 Refresh the official catalog and, when a full quote snapshot is intended, use:
 
 ```bash

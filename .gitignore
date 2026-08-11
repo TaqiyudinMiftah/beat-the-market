@@ -28,6 +28,14 @@ reports/*.md
 !reports/deep_ml_rolling_summary.csv
 !reports/deep_ml_training.csv
 !reports/deep_ml_summary.json
+!reports/stacked_model_findings.md
+!reports/stacked_model_metrics.csv
+!reports/stacked_model_bootstrap.csv
+!reports/stacked_model_robustness.csv
+!reports/stacked_model_rolling.csv
+!reports/stacked_model_rolling_summary.csv
+!reports/stacked_model_training.csv
+!reports/stacked_model_summary.json
 web/node_modules/
 web/dist/
 web/.vite/

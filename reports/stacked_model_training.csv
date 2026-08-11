@@ -1,0 +1,5 @@
+model,target,signals,forecast_rows,median_training_rows
+stack_ridge_raw,target,54,1490,988.0
+stack_ridge_excess,target_excess,54,1490,988.0
+stack_lightgbm_raw,target,54,1490,988.0
+stack_lightgbm_excess,target_excess,54,1490,988.0
