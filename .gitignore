@@ -1,0 +1,13 @@
+__pycache__/
+*.py[cod]
+.venv/
+data/raw/yahoo/*.csv
+data/raw/*.pdf
+data/processed/
+reports/*.json
+reports/*.csv
+reports/*.md
+!data/raw/.gitkeep
+!reports/.gitkeep
+!reports/research_findings_adjclose.md
+!reports/research_findings_close.md

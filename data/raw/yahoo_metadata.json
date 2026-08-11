@@ -1,0 +1,259 @@
+{
+  "source": "Yahoo Finance chart API",
+  "source_url_template": "https://query2.finance.yahoo.com/v8/finance/chart/{ticker}",
+  "downloaded_at_utc": "2026-08-11T15:58:49.501047+00:00",
+  "requested_start": "2015-01-01",
+  "requested_end_exclusive": "2026-08-12",
+  "benchmark": "^JKSE",
+  "universe_file": "data/universe_idx30_2026-08.csv",
+  "files": [
+    {
+      "ticker": "^JKSE",
+      "file": "data/raw/yahoo/INDEX_JKSE.csv",
+      "rows": 2803,
+      "first_date": "2015-01-02",
+      "last_date": "2026-08-11",
+      "status": "cached"
+    },
+    {
+      "ticker": "AADI",
+      "file": "data/raw/yahoo/AADI.csv",
+      "rows": 398,
+      "first_date": "2024-12-05",
+      "last_date": "2026-08-11",
+      "status": "downloaded"
+    },
+    {
+      "ticker": "ADMR",
+      "file": "data/raw/yahoo/ADMR.csv",
+      "rows": 1104,
+      "first_date": "2022-01-03",
+      "last_date": "2026-08-11",
+      "status": "downloaded"
+    },
+    {
+      "ticker": "ADRO",
+      "file": "data/raw/yahoo/ADRO.csv",
+      "rows": 2856,
+      "first_date": "2015-01-02",
+      "last_date": "2026-08-11",
+      "status": "downloaded"
+    },
+    {
+      "ticker": "AMRT",
+      "file": "data/raw/yahoo/AMRT.csv",
+      "rows": 2857,
+      "first_date": "2015-01-02",
+      "last_date": "2026-08-11",
+      "status": "downloaded"
+    },
+    {
+      "ticker": "ANTM",
+      "file": "data/raw/yahoo/ANTM.csv",
+      "rows": 2857,
+      "first_date": "2015-01-02",
+      "last_date": "2026-08-11",
+      "status": "downloaded"
+    },
+    {
+      "ticker": "ASII",
+      "file": "data/raw/yahoo/ASII.csv",
+      "rows": 2856,
+      "first_date": "2015-01-02",
+      "last_date": "2026-08-11",
+      "status": "downloaded"
+    },
+    {
+      "ticker": "BBCA",
+      "file": "data/raw/yahoo/BBCA.csv",
+      "rows": 2857,
+      "first_date": "2015-01-02",
+      "last_date": "2026-08-11",
+      "status": "downloaded"
+    },
+    {
+      "ticker": "BBNI",
+      "file": "data/raw/yahoo/BBNI.csv",
+      "rows": 2857,
+      "first_date": "2015-01-02",
+      "last_date": "2026-08-11",
+      "status": "downloaded"
+    },
+    {
+      "ticker": "BBRI",
+      "file": "data/raw/yahoo/BBRI.csv",
+      "rows": 2857,
+      "first_date": "2015-01-02",
+      "last_date": "2026-08-11",
+      "status": "downloaded"
+    },
+    {
+      "ticker": "BMRI",
+      "file": "data/raw/yahoo/BMRI.csv",
+      "rows": 2857,
+      "first_date": "2015-01-02",
+      "last_date": "2026-08-11",
+      "status": "downloaded"
+    },
+    {
+      "ticker": "BRPT",
+      "file": "data/raw/yahoo/BRPT.csv",
+      "rows": 2857,
+      "first_date": "2015-01-02",
+      "last_date": "2026-08-11",
+      "status": "downloaded"
+    },
+    {
+      "ticker": "BUMI",
+      "file": "data/raw/yahoo/BUMI.csv",
+      "rows": 2857,
+      "first_date": "2015-01-02",
+      "last_date": "2026-08-11",
+      "status": "downloaded"
+    },
+    {
+      "ticker": "CPIN",
+      "file": "data/raw/yahoo/CPIN.csv",
+      "rows": 2856,
+      "first_date": "2015-01-02",
+      "last_date": "2026-08-11",
+      "status": "downloaded"
+    },
+    {
+      "ticker": "DEWA",
+      "file": "data/raw/yahoo/DEWA.csv",
+      "rows": 2857,
+      "first_date": "2015-01-02",
+      "last_date": "2026-08-11",
+      "status": "downloaded"
+    },
+    {
+      "ticker": "EMTK",
+      "file": "data/raw/yahoo/EMTK.csv",
+      "rows": 2857,
+      "first_date": "2015-01-02",
+      "last_date": "2026-08-11",
+      "status": "downloaded"
+    },
+    {
+      "ticker": "GOTO",
+      "file": "data/raw/yahoo/GOTO.csv",
+      "rows": 1037,
+      "first_date": "2022-04-11",
+      "last_date": "2026-08-11",
+      "status": "downloaded"
+    },
+    {
+      "ticker": "ICBP",
+      "file": "data/raw/yahoo/ICBP.csv",
+      "rows": 2856,
+      "first_date": "2015-01-02",
+      "last_date": "2026-08-11",
+      "status": "downloaded"
+    },
+    {
+      "ticker": "INCO",
+      "file": "data/raw/yahoo/INCO.csv",
+      "rows": 2856,
+      "first_date": "2015-01-02",
+      "last_date": "2026-08-11",
+      "status": "downloaded"
+    },
+    {
+      "ticker": "INDF",
+      "file": "data/raw/yahoo/INDF.csv",
+      "rows": 2857,
+      "first_date": "2015-01-02",
+      "last_date": "2026-08-11",
+      "status": "downloaded"
+    },
+    {
+      "ticker": "INKP",
+      "file": "data/raw/yahoo/INKP.csv",
+      "rows": 2856,
+      "first_date": "2015-01-02",
+      "last_date": "2026-08-11",
+      "status": "downloaded"
+    },
+    {
+      "ticker": "JPFA",
+      "file": "data/raw/yahoo/JPFA.csv",
+      "rows": 2857,
+      "first_date": "2015-01-02",
+      "last_date": "2026-08-11",
+      "status": "downloaded"
+    },
+    {
+      "ticker": "KLBF",
+      "file": "data/raw/yahoo/KLBF.csv",
+      "rows": 2857,
+      "first_date": "2015-01-02",
+      "last_date": "2026-08-11",
+      "status": "downloaded"
+    },
+    {
+      "ticker": "MBMA",
+      "file": "data/raw/yahoo/MBMA.csv",
+      "rows": 786,
+      "first_date": "2023-04-18",
+      "last_date": "2026-08-11",
+      "status": "downloaded"
+    },
+    {
+      "ticker": "MDKA",
+      "file": "data/raw/yahoo/MDKA.csv",
+      "rows": 2734,
+      "first_date": "2015-06-19",
+      "last_date": "2026-08-11",
+      "status": "downloaded"
+    },
+    {
+      "ticker": "MEDC",
+      "file": "data/raw/yahoo/MEDC.csv",
+      "rows": 2857,
+      "first_date": "2015-01-02",
+      "last_date": "2026-08-11",
+      "status": "downloaded"
+    },
+    {
+      "ticker": "PGAS",
+      "file": "data/raw/yahoo/PGAS.csv",
+      "rows": 2856,
+      "first_date": "2015-01-02",
+      "last_date": "2026-08-11",
+      "status": "downloaded"
+    },
+    {
+      "ticker": "PGEO",
+      "file": "data/raw/yahoo/PGEO.csv",
+      "rows": 820,
+      "first_date": "2023-02-24",
+      "last_date": "2026-08-11",
+      "status": "downloaded"
+    },
+    {
+      "ticker": "TLKM",
+      "file": "data/raw/yahoo/TLKM.csv",
+      "rows": 2856,
+      "first_date": "2015-01-02",
+      "last_date": "2026-08-11",
+      "status": "downloaded"
+    },
+    {
+      "ticker": "UNTR",
+      "file": "data/raw/yahoo/UNTR.csv",
+      "rows": 2856,
+      "first_date": "2015-01-02",
+      "last_date": "2026-08-11",
+      "status": "downloaded"
+    },
+    {
+      "ticker": "UNVR",
+      "file": "data/raw/yahoo/UNVR.csv",
+      "rows": 2857,
+      "first_date": "2015-01-02",
+      "last_date": "2026-08-11",
+      "status": "downloaded"
+    }
+  ]
+}
