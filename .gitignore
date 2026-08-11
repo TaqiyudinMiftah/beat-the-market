@@ -134,6 +134,15 @@ reports/*.md
 !reports/chronos2_cross_cap_sensitivity.csv
 !reports/chronos2_cross_cap_coverage.csv
 !reports/chronos2_cross_cap_summary.json
+!reports/all_stock_ml_close_findings.md
+!reports/all_stock_ml_close_metrics.csv
+!reports/all_stock_ml_close_bootstrap.csv
+!reports/all_stock_ml_close_robustness.csv
+!reports/all_stock_ml_close_rolling.csv
+!reports/all_stock_ml_close_rolling_summary.csv
+!reports/all_stock_ml_close_sensitivity.csv
+!reports/all_stock_ml_close_training.csv
+!reports/all_stock_ml_close_summary.json
 web/node_modules/
 web/dist/
 web/.vite/

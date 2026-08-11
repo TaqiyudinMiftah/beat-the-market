@@ -203,6 +203,19 @@ top-500 lower-tail forecasts. The ensemble improves rolling stability and
 holdout excess in the recorded sample, but it fails the fair top-500-control
 validation gate; see `reports/chronos2_cross_cap_findings.md`.
 
+The all-listed factor-ML candidate is also replayed on raw closes with isolated
+outputs:
+
+~~~bash
+PYTHONPATH=$PWD /tmp/beat-market-ml-venv/bin/python -m src.all_stock_ml_research \
+  --price-field close --output-prefix all_stock_ml_close
+~~~
+
+The close-price LightGBM audit failed its fixed gate because 2025–2026 excess
+was negative and drawdown/running-window stability deteriorated. This keeps the
+adjusted-price LightGBM result exploratory rather than presenting it as a
+price-field-independent edge.
+
 The paper-factor audit adapts two established cross-sectional findings to the
 long-only app: intermediate-horizon momentum and betting against beta. It uses
 an equal-weight score of 12–1 momentum, low 60-day volatility, and low
