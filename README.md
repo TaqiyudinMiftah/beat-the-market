@@ -138,6 +138,23 @@ predeclared validation gate; the lower-tail variant was less fragile but still
 failed. This negative result is retained as a guard against promoting a
 foundation model merely because it is newer or more complex.
 
+The daily Chronos-2 follow-up tests the same model on 256 daily observations
+with a fixed 21-business-day horizon. It compares absolute and normalized
+log-price contexts, individual and cross-series inference, and terminal median
+versus lower-tail forecasts:
+
+~~~bash
+HF_HOME=/tmp/beat-market-hf PYTHONPATH=$PWD \
+  /tmp/beat-market-ml-venv/bin/python -m src.chronos2_daily_research
+~~~
+
+See `reports/chronos2_daily_findings.md` and its committed diagnostic tables.
+In the 90-signal run recorded there, the cross-learning lower-tail variants
+passed the fixed historical gate, but the overall preferred candidate remains
+none because the full validation-selection winner (`cap300_rank_ridge`) failed
+the gate. This result needs point-in-time universe data and future holdout
+validation before it can be considered for the app.
+
 The paper-factor audit adapts two established cross-sectional findings to the
 long-only app: intermediate-horizon momentum and betting against beta. It uses
 an equal-weight score of 12–1 momentum, low 60-day volatility, and low

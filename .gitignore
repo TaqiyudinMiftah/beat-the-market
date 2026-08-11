@@ -75,6 +75,16 @@ reports/*.md
 !reports/paper_factor_context.csv
 !reports/paper_factor_training.csv
 !reports/paper_factor_summary.json
+!reports/chronos2_daily_findings.md
+!reports/chronos2_daily_metrics.csv
+!reports/chronos2_daily_bootstrap.csv
+!reports/chronos2_daily_robustness.csv
+!reports/chronos2_daily_rolling.csv
+!reports/chronos2_daily_rolling_summary.csv
+!reports/chronos2_daily_sensitivity.csv
+!reports/chronos2_daily_context.csv
+!reports/chronos2_daily_training.csv
+!reports/chronos2_daily_summary.json
 web/node_modules/
 web/dist/
 web/.vite/
