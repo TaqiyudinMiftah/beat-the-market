@@ -280,6 +280,22 @@ top-500 replay produced positive MLP holdout excess but failed the rolling or
 bootstrap gate. This sensitivity means the top-300 result is not yet a
 universe-robust formula.
 
+The next experiment fine-tunes Chronos-2 once on 650 current-catalog daily
+series ending 31 December 2021, then freezes the model for 2022–2026
+forecasts:
+
+```bash
+HF_HOME=/tmp/beat-market-hf PYTHONPATH=$PWD \
+  /tmp/beat-market-ml-venv/bin/python -m src.chronos2_finetune_research
+```
+
+The historical-cutoff fine-tuning audit is in
+`reports/chronos2_finetune_findings.md`. The lower-tail variant produced
+45.81% 2025–2026 excess but failed the bootstrap lower-confidence-bound test;
+the median variant lost 57.91% excess in 2024 before rebounding. Neither
+variant passed the fixed gate, so fine-tuning is not promoted over the
+zero-shot or MLP candidates.
+
 The forecast-stacking experiment combines the completed Chronos, TimesFM,
 Kronos, and factor-MLP forecast panels with the existing composite. It tests a
 regularized Ridge stacker, shallow LightGBM stacker, and fixed rank blends using

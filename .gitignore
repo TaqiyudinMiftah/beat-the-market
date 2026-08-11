@@ -183,6 +183,17 @@ reports/*.md
 !reports/all_stock_deep_cap500_context.csv
 !reports/all_stock_deep_cap500_training.csv
 !reports/all_stock_deep_cap500_summary.json
+!reports/chronos2_finetune_findings.md
+!reports/chronos2_finetune_metrics.csv
+!reports/chronos2_finetune_bootstrap.csv
+!reports/chronos2_finetune_robustness.csv
+!reports/chronos2_finetune_rolling.csv
+!reports/chronos2_finetune_rolling_summary.csv
+!reports/chronos2_finetune_sensitivity.csv
+!reports/chronos2_finetune_context.csv
+!reports/chronos2_finetune_training.csv
+!reports/chronos2_finetune_training_series.csv
+!reports/chronos2_finetune_summary.json
 web/node_modules/
 web/dist/
 web/.vite/

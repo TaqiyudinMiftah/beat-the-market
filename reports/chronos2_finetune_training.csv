@@ -1,0 +1,2 @@
+model,series,median_training_observations,min_training_observations,max_training_observations,train_end,fine_tune_steps
+chronos2_finetuned,650,1752.0,318,1753,2021-12-31,100
