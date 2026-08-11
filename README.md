@@ -304,6 +304,21 @@ positive rolling windows, and a 0.62% bootstrap lower bound, but the overall
 validation winner was the unstable median variant. Under the conservative
 selection rule, no Chronos fine-tuned model is promoted.
 
+The newest-data lockbox replay evaluates those frozen forecast panels on the
+six completed monthly observations from January through July 2026 (the local
+data snapshot ends 11 August). It performs no fitting or model selection and
+is deliberately descriptive:
+
+```bash
+PYTHONPATH=$PWD /tmp/beat-market-ml-venv/bin/python -m src.lockbox_research
+```
+
+The 2026 lockbox favored the annual-refit Chronos lower-tail panel, with
+113.19% excess CAGR versus 48.86% for the MLP, but six months is too short to
+promote a model or establish a durable edge. See
+`reports/lockbox_findings.md` and the committed lockbox tables. The validation
+winner remains the adjusted-price MLP under the predeclared selection rule.
+
 The forecast-stacking experiment combines the completed Chronos, TimesFM,
 Kronos, and factor-MLP forecast panels with the existing composite. It tests a
 regularized Ridge stacker, shallow LightGBM stacker, and fixed rank blends using
