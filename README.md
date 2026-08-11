@@ -191,6 +191,18 @@ because the lower-tail panel did not beat its matching top-500 control in
 validation. The individual top-300 result is therefore treated as an
 exploratory signal, not a formula ready for deployment.
 
+The cross-cap replay tests a fixed rank-aggregation method across those three
+audits without running new model inference:
+
+~~~bash
+PYTHONPATH=$PWD python3 -m src.chronos2_cross_cap_research
+~~~
+
+It averages the within-cap percentile ranks of the top-150, top-300, and
+top-500 lower-tail forecasts. The ensemble improves rolling stability and
+holdout excess in the recorded sample, but it fails the fair top-500-control
+validation gate; see `reports/chronos2_cross_cap_findings.md`.
+
 The paper-factor audit adapts two established cross-sectional findings to the
 long-only app: intermediate-horizon momentum and betting against beta. It uses
 an equal-weight score of 12–1 momentum, low 60-day volatility, and low
