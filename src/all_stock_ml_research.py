@@ -60,6 +60,7 @@ class AllStockConfig:
     alpha: float
     data_dir: Path
     universe_path: Path
+    output_prefix: str = "all_stock_ml"
 
 
 def parse_args() -> argparse.Namespace:
@@ -73,6 +74,7 @@ def parse_args() -> argparse.Namespace:
     parser.add_argument("--alpha", type=float, default=DEFAULT_ALPHA)
     parser.add_argument("--data-dir", type=Path, default=DEFAULT_DATA_DIR)
     parser.add_argument("--universe", type=Path, default=ALL_UNIVERSE_PATH)
+    parser.add_argument("--output-prefix", default="all_stock_ml")
     parser.add_argument("--status", action="store_true")
     return parser.parse_args()
 
@@ -105,6 +107,10 @@ def _json_safe(value: Any) -> Any:
     if isinstance(value, float) and not np.isfinite(value):
         return None
     return value
+
+
+def _output_path(config: AllStockConfig, suffix: str) -> Path:
+    return REPORT_DIR / f"{config.output_prefix}_{suffix}"
 
 
 def _filename_for(ticker: str) -> str:
@@ -451,15 +457,15 @@ def write_report(
         for model, model_metrics in metrics.items()
         for _, values in model_metrics.items()
     ]
-    metrics_path = REPORT_DIR / "all_stock_ml_metrics.csv"
-    robustness_path = REPORT_DIR / "all_stock_ml_robustness.csv"
-    rolling_path = REPORT_DIR / "all_stock_ml_rolling.csv"
-    rolling_summary_path = REPORT_DIR / "all_stock_ml_rolling_summary.csv"
-    bootstrap_path = REPORT_DIR / "all_stock_ml_bootstrap.csv"
-    training_path = REPORT_DIR / "all_stock_ml_training.csv"
-    sensitivity_path = REPORT_DIR / "all_stock_ml_sensitivity.csv"
-    summary_path = REPORT_DIR / "all_stock_ml_summary.json"
-    report_path = REPORT_DIR / "all_stock_ml_findings.md"
+    metrics_path = _output_path(config, "metrics.csv")
+    robustness_path = _output_path(config, "robustness.csv")
+    rolling_path = _output_path(config, "rolling.csv")
+    rolling_summary_path = _output_path(config, "rolling_summary.csv")
+    bootstrap_path = _output_path(config, "bootstrap.csv")
+    training_path = _output_path(config, "training.csv")
+    sensitivity_path = _output_path(config, "sensitivity.csv")
+    summary_path = _output_path(config, "summary.json")
+    report_path = _output_path(config, "findings.md")
     pd.DataFrame(metrics_rows).to_csv(metrics_path, index=False)
     robustness.to_csv(robustness_path, index=False)
     rolling.to_csv(rolling_path, index=False)
@@ -484,7 +490,7 @@ def write_report(
             forecast_rows.append(rows)
     if forecast_rows:
         pd.concat(forecast_rows, ignore_index=True).to_csv(
-            REPORT_DIR / "all_stock_ml_forecasts.csv", index=False
+            _output_path(config, "forecasts.csv"), index=False
         )
 
     gate_lines = []
@@ -565,7 +571,7 @@ python3 src/download_data.py --universe all --output-dir data/raw/yahoo_all \
 PYTHONPATH=$PWD /tmp/beat-market-ml-venv/bin/python -m src.all_stock_ml_research
 ```
 
-Raw all-stock forecasts are written to ignored `reports/all_stock_ml_forecasts.csv`. Committed tables are in `reports/all_stock_ml_metrics.csv`, `reports/all_stock_ml_robustness.csv`, `reports/all_stock_ml_rolling_summary.csv`, `reports/all_stock_ml_bootstrap.csv`, `reports/all_stock_ml_training.csv`, and `reports/all_stock_ml_sensitivity.csv`.
+Raw all-stock forecasts are written to ignored `reports/{config.output_prefix}_forecasts.csv`. Committed tables use the same `{config.output_prefix}_` prefix.
 """
     report_path.write_text(report, encoding="utf-8")
     summary_path.write_text(
@@ -604,6 +610,8 @@ def run(config: AllStockConfig) -> dict[str, dict[str, dict[str, Any]]]:
         raise ValueError("top_k must be between 1 and 30")
     if config.cost_bps < 0.0 or config.min_train_rows < 60 or config.alpha <= 0.0:
         raise ValueError("cost, minimum training rows, and alpha are invalid")
+    if not config.output_prefix or Path(config.output_prefix).name != config.output_prefix:
+        raise ValueError("output_prefix must be a non-empty filename prefix")
     prices, volumes, loaded_tickers, skipped = load_prices(
         config.data_dir, config.universe_path, config.price_field
     )
@@ -695,6 +703,7 @@ def main() -> None:
         alpha=args.alpha,
         data_dir=args.data_dir.resolve(),
         universe_path=args.universe.resolve(),
+        output_prefix=args.output_prefix,
     )
     metrics = run(config)
     summary = pd.DataFrame(
@@ -710,7 +719,10 @@ def main() -> None:
         ]
     )
     print(summary.to_string(index=False, float_format=lambda value: f"{value:0.4f}"))
-    print("\nWrote reports/all_stock_ml_findings.md and reports/all_stock_ml_metrics.csv")
+    print(
+        f"\nWrote reports/{args.output_prefix}_findings.md and "
+        f"reports/{args.output_prefix}_metrics.csv"
+    )
 
 
 if __name__ == "__main__":
