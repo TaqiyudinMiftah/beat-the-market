@@ -158,7 +158,7 @@ def _metrics_table(metrics: dict[str, dict[str, dict[str, Any]]]) -> str:
                     _format(lockbox.get("strategy_max_drawdown")),
                 ]
             )
-            + "|"
+            + " |"
         )
     return "\n".join(lines)
 
