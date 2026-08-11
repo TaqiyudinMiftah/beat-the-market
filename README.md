@@ -296,6 +296,14 @@ the median variant lost 57.91% excess in 2024 before rebounding. Neither
 variant passed the fixed gate, so fine-tuning is not promoted over the
 zero-shot or MLP candidates.
 
+An annual walk-forward refit variant is recorded in
+`reports/chronos2_finetune_walkforward_findings.md`. It refits through the
+prior calendar year before each new year. Its lower-tail model passed the
+individual gate with 10.35% 2024 excess, 51.06% 2025–2026 excess, 70.45%
+positive rolling windows, and a 0.62% bootstrap lower bound, but the overall
+validation winner was the unstable median variant. Under the conservative
+selection rule, no Chronos fine-tuned model is promoted.
+
 The forecast-stacking experiment combines the completed Chronos, TimesFM,
 Kronos, and factor-MLP forecast panels with the existing composite. It tests a
 regularized Ridge stacker, shallow LightGBM stacker, and fixed rank blends using

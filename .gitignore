@@ -194,6 +194,17 @@ reports/*.md
 !reports/chronos2_finetune_training.csv
 !reports/chronos2_finetune_training_series.csv
 !reports/chronos2_finetune_summary.json
+!reports/chronos2_finetune_walkforward_findings.md
+!reports/chronos2_finetune_walkforward_metrics.csv
+!reports/chronos2_finetune_walkforward_bootstrap.csv
+!reports/chronos2_finetune_walkforward_robustness.csv
+!reports/chronos2_finetune_walkforward_rolling.csv
+!reports/chronos2_finetune_walkforward_rolling_summary.csv
+!reports/chronos2_finetune_walkforward_sensitivity.csv
+!reports/chronos2_finetune_walkforward_context.csv
+!reports/chronos2_finetune_walkforward_training.csv
+!reports/chronos2_finetune_walkforward_training_series.csv
+!reports/chronos2_finetune_walkforward_summary.json
 web/node_modules/
 web/dist/
 web/.vite/
