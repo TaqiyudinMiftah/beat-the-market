@@ -123,6 +123,21 @@ chronological blocks; the auditable tables are
 loaded before the requested evaluation window, while all reported signals are
 still restricted to the configured dates.
 
+The Chronos-2 follow-up tests multivariate cross-series learning on the
+all-listed panel. It uses a fixed 48-month monthly log-price context, a
+trailing-liquidity top-300 screen, and compares individual, cross-learning, and
+10th-percentile risk-aware forecasts:
+
+```bash
+HF_HOME=/tmp/beat-market-hf PYTHONPATH=$PWD \
+  /tmp/beat-market-ml-venv/bin/python -m src.chronos2_research
+```
+
+See `reports/chronos2_findings.md`. The Chronos-2 median variants failed the
+predeclared validation gate; the lower-tail variant was less fragile but still
+failed. This negative result is retained as a guard against promoting a
+foundation model merely because it is newer or more complex.
+
 The deep-learning experiment is a separate optional CPU run. It trains a small
 three-seed factor MLP with an internal historical validation slice, then tests
 fixed blends and causal online weighting against the existing composite:

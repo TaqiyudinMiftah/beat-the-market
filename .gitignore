@@ -56,6 +56,15 @@ reports/*.md
 !reports/liquid_rank_ml_sensitivity.csv
 !reports/liquid_rank_ml_training.csv
 !reports/liquid_rank_ml_summary.json
+!reports/chronos2_findings.md
+!reports/chronos2_metrics.csv
+!reports/chronos2_bootstrap.csv
+!reports/chronos2_robustness.csv
+!reports/chronos2_rolling.csv
+!reports/chronos2_rolling_summary.csv
+!reports/chronos2_sensitivity.csv
+!reports/chronos2_context.csv
+!reports/chronos2_summary.json
 web/node_modules/
 web/dist/
 web/.vite/
