@@ -92,6 +92,7 @@ def parse_args() -> argparse.Namespace:
     parser.add_argument("--max-signals", type=int, default=0)
     parser.add_argument("--device", default="cpu")
     parser.add_argument("--model-id", default=DEFAULT_MODEL_ID)
+    parser.add_argument("--output-prefix", default="chronos2_daily")
     parser.add_argument("--data-dir", type=Path, default=DEFAULT_DATA_DIR)
     parser.add_argument("--universe", type=Path, default=DEFAULT_UNIVERSE_PATH)
     parser.add_argument("--status", action="store_true")
@@ -148,6 +149,8 @@ def _validate_args(args: argparse.Namespace) -> None:
         raise ValueError("cost, minimum training rows, and alpha are invalid")
     if args.batch_size < 1 or args.max_signals < 0:
         raise ValueError("batch_size and max_signals are invalid")
+    if not args.output_prefix or Path(args.output_prefix).name != args.output_prefix:
+        raise ValueError("output_prefix must be a non-empty filename prefix")
 
 
 def _read_daily_frames(data_dir: Path, tickers: list[str]) -> dict[str, pd.DataFrame]:
@@ -406,19 +409,22 @@ def _write_outputs(
     forecast_count: int,
 ) -> None:
     REPORT_DIR.mkdir(parents=True, exist_ok=True)
+
+    def output_path(suffix: str) -> Path:
+        return REPORT_DIR / f"{config.output_prefix}_{suffix}"
     metrics_rows = [
         {"model": model, **values}
         for model, model_metrics in metrics.items()
         for _, values in model_metrics.items()
     ]
-    pd.DataFrame(metrics_rows).to_csv(REPORT_DIR / "chronos2_daily_metrics.csv", index=False)
-    diagnostics.to_csv(REPORT_DIR / "chronos2_daily_robustness.csv", index=False)
-    rolling.to_csv(REPORT_DIR / "chronos2_daily_rolling.csv", index=False)
-    rolling_summary.to_csv(REPORT_DIR / "chronos2_daily_rolling_summary.csv", index=False)
-    bootstrap.to_csv(REPORT_DIR / "chronos2_daily_bootstrap.csv", index=False)
-    sensitivity.to_csv(REPORT_DIR / "chronos2_daily_sensitivity.csv", index=False)
-    context_rows.to_csv(REPORT_DIR / "chronos2_daily_context.csv", index=False)
-    training_rows.to_csv(REPORT_DIR / "chronos2_daily_training.csv", index=False)
+    pd.DataFrame(metrics_rows).to_csv(output_path("metrics.csv"), index=False)
+    diagnostics.to_csv(output_path("robustness.csv"), index=False)
+    rolling.to_csv(output_path("rolling.csv"), index=False)
+    rolling_summary.to_csv(output_path("rolling_summary.csv"), index=False)
+    bootstrap.to_csv(output_path("bootstrap.csv"), index=False)
+    sensitivity.to_csv(output_path("sensitivity.csv"), index=False)
+    context_rows.to_csv(output_path("context.csv"), index=False)
+    training_rows.to_csv(output_path("training.csv"), index=False)
 
     forecast_rows: list[pd.DataFrame] = []
     for model, panel in panels.items():
@@ -437,7 +443,7 @@ def _write_outputs(
             )
     if forecast_rows:
         pd.concat(forecast_rows, ignore_index=True).to_csv(
-            REPORT_DIR / "chronos2_daily_forecasts.csv",
+            output_path("forecasts.csv"),
             index=False,
         )
 
@@ -472,7 +478,7 @@ def _write_outputs(
             "idx_methodology": IDX_METHOD_SOURCE,
         },
     }
-    (REPORT_DIR / "chronos2_daily_summary.json").write_text(
+    output_path("summary.json").write_text(
         json.dumps(_json_safe(summary), indent=2, allow_nan=False),
         encoding="utf-8",
     )
@@ -532,11 +538,11 @@ HF_HOME=/tmp/beat-market-hf PYTHONPATH=$PWD \\
   /tmp/beat-market-ml-venv/bin/python -m src.chronos2_daily_research
 ~~~
 
-For a smoke run, add --max-signals 1. Raw forecasts remain ignored in reports/chronos2_daily_forecasts.csv. Committed tables are chronos2_daily_metrics.csv, chronos2_daily_robustness.csv, chronos2_daily_rolling_summary.csv, chronos2_daily_bootstrap.csv, chronos2_daily_sensitivity.csv, chronos2_daily_context.csv, and chronos2_daily_training.csv.
+For a smoke run, add --max-signals 1. Raw forecasts remain ignored in reports/{config.output_prefix}_forecasts.csv. The committed tables use the same {config.output_prefix}_ prefix.
 
 This is research, not investment advice, and no backtest guarantees future performance.
 """
-    (REPORT_DIR / "chronos2_daily_findings.md").write_text(report, encoding="utf-8")
+    output_path("findings.md").write_text(report, encoding="utf-8")
 
 
 def _simulate_panels(
@@ -856,7 +862,10 @@ def main() -> None:
         f"Chronos-2 daily winner: {result['chronos_validation_winner']}; "
         f"preferred: {result['preferred']}"
     )
-    print("Wrote reports/chronos2_daily_findings.md and reports/chronos2_daily_metrics.csv")
+    print(
+        f"Wrote reports/{args.output_prefix}_findings.md and "
+        f"reports/{args.output_prefix}_metrics.csv"
+    )
 
 
 if __name__ == "__main__":
