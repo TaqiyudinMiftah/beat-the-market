@@ -1,0 +1,14 @@
+services:
+  - type: web
+    name: beat-the-market-api
+    runtime: python
+    buildCommand: pip install -r requirements.txt
+    startCommand: uvicorn api.main:app --host 0.0.0.0 --port $PORT
+    healthCheckPath: /api/health
+    envVars:
+      - key: CORS_ORIGINS
+        sync: false
+      - key: REFRESH_TOKEN
+        sync: false
+      - key: DATA_START
+        value: "2015-01-01"

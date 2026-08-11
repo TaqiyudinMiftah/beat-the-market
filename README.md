@@ -67,3 +67,47 @@ survivorship and index-membership look-ahead bias because historical
 constituent snapshots and delisted names are not yet included. Treat results as
 an exploratory baseline until point-in-time constituents, delistings,
 suspensions, bid/ask spreads, taxes, and execution constraints are added.
+
+## Run the web app locally
+
+The public UI is a Vite/React dashboard backed by a typed FastAPI service. It
+uses Lightweight Charts for daily candles, volume, moving averages, signal
+inspection, and simple trend/level drawings.
+
+```bash
+python3 -m pip install -r requirements.txt
+python3 src/download_data.py
+uvicorn api.main:app --reload                 # terminal 1, http://localhost:8000
+cd web && npm install && npm run dev          # terminal 2, http://localhost:5173
+```
+
+The dashboard includes the latest cross-sectional ranking, stock-level factor
+explanations, an educational method guide, shareable URLs, and a Strategy Lab.
+The lab supports momentum, volatility, trend, and liquidity factor blocks with
+validated weights, top-K selection, monthly rebalancing, and one-way costs.
+
+The API exposes `/api/health`, `/api/data-status`, `/api/universe`,
+`/api/stocks/{ticker}/ohlcv`, `/api/stocks/{ticker}/features`,
+`/api/rankings`, `/api/strategies/default`, and `POST /api/backtests`.
+`POST /api/admin/refresh` requires the `X-Refresh-Token` header and is intended
+for a scheduler or an operator—not for an unprotected browser action.
+
+## Deployment
+
+For the planned split deployment, create the FastAPI service from
+`render.yaml`, set `CORS_ORIGINS` to the Vercel URL, set a strong
+`REFRESH_TOKEN`, and attach persistent storage mounted at `data/raw` so cached
+CSV files survive deploys. In Vercel, set the project root to `web`, build with
+`npm run build`, publish `dist`, and set `VITE_API_URL` to the Render API URL.
+
+The included GitHub Actions workflow runs on weekdays at 18:00 WIB and calls
+the protected refresh endpoint. Add repository secrets named `API_URL` and
+`REFRESH_TOKEN`; use the workflow dispatch button for a manual refresh.
+
+## Verification
+
+```bash
+pytest -q
+python3 -m py_compile src/*.py api/*.py
+cd web && npm run build && npm test
+```

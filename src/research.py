@@ -11,7 +11,6 @@ from __future__ import annotations
 import argparse
 import json
 from pathlib import Path
-from typing import Callable
 
 import numpy as np
 import pandas as pd
@@ -70,7 +69,6 @@ def completed_monthly_last(frame: pd.DataFrame | pd.Series) -> pd.DataFrame | pd
 def make_features(prices: pd.DataFrame, volumes: pd.DataFrame) -> dict[str, pd.DataFrame | pd.Series]:
     market = prices["^JKSE"]
     stocks = prices.drop(columns="^JKSE")
-    stock_returns = stocks.pct_change(fill_method=None)
     dollar_volume = stocks * volumes.drop(columns="^JKSE")
 
     month_end_prices = completed_monthly_last(stocks)
@@ -92,12 +90,15 @@ def make_features(prices: pd.DataFrame, volumes: pd.DataFrame) -> dict[str, pd.D
     month_end_trend = completed_monthly_last(trend_sma200)
     month_end_liquidity = completed_monthly_last(avg_dollar_volume)
     market_sma200 = market / market.rolling(200, min_periods=150).mean() - 1.0
-    market_trend = market_sma200.resample("ME").last()
+    market_trend = completed_monthly_last(market_sma200)
     market_mom12_1 = month_end_market.shift(1) / month_end_market.shift(12) - 1.0
     risk_on = (market_trend > 0.0) & (market_mom12_1 > 0.0)
 
     return {
         "monthly_prices": month_end_prices,
+        "daily_prices": stocks,
+        "daily_returns": stocks.pct_change(fill_method=None),
+        "dollar_volume": dollar_volume,
         "monthly_returns": monthly_returns,
         "benchmark_returns": benchmark_returns,
         "mom12_1": mom12_1,

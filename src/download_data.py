@@ -10,7 +10,7 @@ from __future__ import annotations
 import argparse
 import json
 import time
-from datetime import date, datetime, timedelta, timezone
+from datetime import date, datetime, timezone
 from pathlib import Path
 from urllib.parse import quote
 
@@ -98,6 +98,43 @@ def fetch_chart(
                 errors.append(f"{host} attempt {attempt + 1}: {exc}")
                 time.sleep(min(2.0 * (attempt + 1), 8.0))
     raise RuntimeError(f"Could not download {ticker} ({yahoo_ticker}): {'; '.join(errors)}")
+
+
+def download_universe(start: str = "2015-01-01", end: str = "2026-08-12", sleep_seconds: float = 0.35) -> dict[str, object]:
+    """Refresh the configured universe and return a compact refresh manifest."""
+    universe = pd.read_csv(UNIVERSE_PATH)
+    tickers = ["^JKSE", *universe["ticker"].tolist()]
+    OUT_DIR.mkdir(parents=True, exist_ok=True)
+    session = requests.Session()
+    session.headers.update({"User-Agent": "beat-the-market research/0.1"})
+    downloaded: list[dict[str, object]] = []
+    for ticker in tickers:
+        output_path = OUT_DIR / filename_for(ticker)
+        frame = fetch_chart(session, ticker, start, end)
+        frame.to_csv(output_path, index=False, date_format="%Y-%m-%d")
+        downloaded.append(
+            {
+                "ticker": ticker,
+                "file": str(output_path.relative_to(ROOT)),
+                "rows": int(len(frame)),
+                "first_date": str(frame["date"].min().date()),
+                "last_date": str(frame["date"].max().date()),
+                "status": "downloaded",
+            }
+        )
+        time.sleep(max(sleep_seconds, 0.0))
+    metadata = {
+        "source": "Yahoo Finance chart API",
+        "source_url_template": "https://query2.finance.yahoo.com/v8/finance/chart/{ticker}",
+        "downloaded_at_utc": datetime.now(timezone.utc).isoformat(),
+        "requested_start": start,
+        "requested_end_exclusive": end,
+        "benchmark": "^JKSE",
+        "universe_file": str(UNIVERSE_PATH.relative_to(ROOT)),
+        "files": downloaded,
+    }
+    METADATA_PATH.write_text(json.dumps(metadata, indent=2), encoding="utf-8")
+    return metadata
 
 
 def main() -> None:

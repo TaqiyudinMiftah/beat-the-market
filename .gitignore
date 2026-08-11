@@ -11,3 +11,9 @@ reports/*.md
 !reports/.gitkeep
 !reports/research_findings_adjclose.md
 !reports/research_findings_close.md
+web/node_modules/
+web/dist/
+web/.vite/
+web/.env
+web/.env.*
+!web/.env.example
