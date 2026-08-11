@@ -20,6 +20,14 @@ reports/*.md
 !reports/foundation_model_robustness.csv
 !reports/foundation_model_rolling.csv
 !reports/foundation_model_rolling_summary.csv
+!reports/deep_ml_findings.md
+!reports/deep_ml_metrics.csv
+!reports/deep_ml_bootstrap.csv
+!reports/deep_ml_robustness.csv
+!reports/deep_ml_rolling.csv
+!reports/deep_ml_rolling_summary.csv
+!reports/deep_ml_training.csv
+!reports/deep_ml_summary.json
 web/node_modules/
 web/dist/
 web/.vite/

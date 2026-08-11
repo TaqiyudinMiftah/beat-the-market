@@ -89,6 +89,20 @@ chronological blocks; the auditable tables are
 loaded before the requested evaluation window, while all reported signals are
 still restricted to the configured dates.
 
+The deep-learning experiment is a separate optional CPU run. It trains a small
+three-seed factor MLP with an internal historical validation slice, then tests
+fixed blends and causal online weighting against the existing composite:
+
+```bash
+python3 -m venv /tmp/beat-market-deep
+/tmp/beat-market-deep/bin/python -m pip install -r requirements-deep-cpu.txt
+PYTHONPATH=$PWD /tmp/beat-market-deep/bin/python -m src.deep_ml_research
+```
+
+See `reports/deep_ml_findings.md` for the current gate decision. The online
+weighting rule may use only realized returns before each signal month; it never
+uses the current or later holdout return.
+
 Refresh the official catalog and, when a full quote snapshot is intended, use:
 
 ```bash

@@ -469,6 +469,8 @@ Chronos, TimesFM, and Kronos should be added only through a separate run that re
 
 The completed zero-shot rolling comparison is in `reports/foundation_model_findings.md` and is reproduced with `python3 -m src.foundation_research` in the CPU foundation environment.
 
+The separate leakage-safe factor-MLP and causal online-weighting experiment is in `reports/deep_ml_findings.md` and is reproduced with `python3 -m src.deep_ml_research` in the optional deep CPU environment.
+
 ## Limitations
 
 - The IDX30 snapshot is a current-universe panel and therefore has survivorship and index-membership look-ahead bias.

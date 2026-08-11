@@ -1,0 +1,3 @@
+model,signals,forecast_rows,median_best_epoch,median_training_rows
+mlp_raw,102,2694,17.0,1857.5
+mlp_excess,102,2694,23.5,1857.5
