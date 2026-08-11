@@ -180,6 +180,11 @@ Its lower-tail panel also passed the fixed gate, but with lower validation
 excess than the 256-day baseline. The result supports testing the method across
 contexts while still requiring a future holdout and point-in-time universe.
 
+The top-150 liquidity-universe stress is recorded in
+`reports/chronos2_daily_cap150_findings.md`. It failed the validation and 2024
+holdout checks, showing that the top-300 result is sensitive to the current
+catalog's liquidity proxy and is not yet a universe-robust strategy.
+
 The paper-factor audit adapts two established cross-sectional findings to the
 long-only app: intermediate-horizon momentum and betting against beta. It uses
 an equal-weight score of 12–1 momentum, low 60-day volatility, and low
