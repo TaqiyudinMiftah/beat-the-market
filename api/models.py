@@ -61,11 +61,15 @@ class DataStatus(BaseModel):
     source: str
     benchmark: str
     universe_size: int
+    research_universe: str = "IDX30"
+    catalog_size: int = 0
+    cached_stock_count: int = 0
     fetched_at_utc: str | None = None
     requested_start: str | None = None
     requested_end_exclusive: str | None = None
     last_trading_date: str | None = None
     missing_tickers: list[str] = Field(default_factory=list)
+    missing_catalog_tickers: list[str] = Field(default_factory=list)
     stale: bool = False
 
 

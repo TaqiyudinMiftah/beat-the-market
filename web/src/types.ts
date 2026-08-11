@@ -27,20 +27,29 @@ export interface DataStatus {
   source: string;
   benchmark: string;
   universe_size: number;
+  research_universe?: string;
+  catalog_size?: number;
+  cached_stock_count?: number;
   fetched_at_utc?: string;
   requested_start?: string;
   requested_end_exclusive?: string;
   last_trading_date?: string;
   missing_tickers: string[];
+  missing_catalog_tickers?: string[];
   stale: boolean;
 }
 
 export interface UniverseStock {
   ticker: string;
   company_name: string;
-  index_effective_from: string;
-  index_effective_to: string;
-  source: string;
+  listing_date?: string | null;
+  shares?: number | null;
+  listing_board?: string | null;
+  index_effective_from?: string | null;
+  index_effective_to?: string | null;
+  source?: string;
+  has_data?: boolean;
+  in_research_universe?: boolean;
 }
 
 export interface Candle {
@@ -72,12 +81,13 @@ export interface StockFeatures {
   ticker: string;
   signal_date: string;
   latest: { date: string; price: number };
-  rank: number;
-  score: number;
+  rank: number | null;
+  score: number | null;
   selected: boolean;
   weight: number;
   factors: Record<string, FactorContribution>;
   monthly_return: number | null;
+  research_status?: "idx30" | "outside_idx30";
 }
 
 export interface EquityPoint {

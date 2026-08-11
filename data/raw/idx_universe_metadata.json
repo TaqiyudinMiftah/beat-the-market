@@ -1,0 +1,9 @@
+{
+  "source": "Indonesia Stock Exchange (IDX) public stock-list endpoint",
+  "source_url": "https://block.idx.id/primary/StockData/GetSecuritiesStock",
+  "language": "id",
+  "retrieved_at_utc": "2026-08-11T17:26:36.986629+00:00",
+  "retrieved_on": "2026-08-12",
+  "rows": 962,
+  "output": "data/universe_idx_all_2026-08.csv"
+}

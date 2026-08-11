@@ -1,0 +1,8 @@
+-r requirements.txt
+
+# Native LightGBM is used so scikit-learn is not required by the baseline run.
+lightgbm>=4.0
+
+# Chronos, TimesFM, and Kronos remain optional heavyweight environments. Install
+# them from their official documentation after recording exact package/model
+# versions; they are intentionally not pulled into the web-app requirements.

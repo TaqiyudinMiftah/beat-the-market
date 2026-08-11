@@ -6,7 +6,6 @@ import hmac
 import os
 from datetime import date
 
-import pandas as pd
 from fastapi import BackgroundTasks, FastAPI, Header, HTTPException, Query
 from fastapi.middleware.cors import CORSMiddleware
 
@@ -50,8 +49,12 @@ def get_default_strategy() -> StrategyConfig:
 
 @app.get("/api/universe")
 def get_universe() -> dict[str, object]:
-    universe = pd.read_csv(service.UNIVERSE_PATH).to_dict(orient="records")
-    return {"benchmark": "^JKSE", "stocks": universe}
+    stocks = service.catalog_frame().to_dict(orient="records")
+    return {
+        "benchmark": "^JKSE",
+        "research_universe": "IDX30",
+        "stocks": stocks,
+    }
 
 
 @app.get("/api/stocks/{ticker}/ohlcv")

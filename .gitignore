@@ -11,6 +11,9 @@ reports/*.md
 !reports/.gitkeep
 !reports/research_findings_adjclose.md
 !reports/research_findings_close.md
+!reports/ml_research_findings.md
+!reports/ml_model_metrics.csv
+!reports/ml_research_summary.json
 web/node_modules/
 web/dist/
 web/.vite/

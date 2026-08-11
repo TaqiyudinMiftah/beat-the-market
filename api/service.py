@@ -13,7 +13,7 @@ from typing import Any, Mapping
 import numpy as np
 import pandas as pd
 
-from src import download_data, research
+from src import download_data, research, universe
 from src.strategy_engine import simulate_strategy, validate_config
 
 from .models import BacktestRequest, DataStatus, StrategyConfig
@@ -23,6 +23,7 @@ ROOT = Path(__file__).resolve().parents[1]
 DATA_DIR = ROOT / "data" / "raw" / "yahoo"
 METADATA_PATH = ROOT / "data" / "raw" / "yahoo_metadata.json"
 UNIVERSE_PATH = ROOT / "data" / "universe_idx30_2026-08.csv"
+CATALOG_PATH = ROOT / "data" / "universe_idx_all_2026-08.csv"
 
 
 class DataUnavailable(RuntimeError):
@@ -33,15 +34,36 @@ def _file_for(ticker: str) -> Path:
     return DATA_DIR / download_data.filename_for(ticker)
 
 
+def catalog_frame() -> pd.DataFrame:
+    """Return the full IDX catalog with local-data and research-universe flags."""
+    try:
+        catalog = universe.load_all_stocks()
+    except FileNotFoundError:
+        catalog = universe.load_idx30().rename(
+            columns={
+                "index_effective_from": "listing_date",
+                "index_effective_to": "listing_board",
+            }
+        )
+    research_tickers = set(universe.load_idx30()["ticker"].astype(str).str.upper())
+    catalog = catalog.copy()
+    catalog["ticker"] = catalog["ticker"].astype(str).str.upper()
+    catalog["in_research_universe"] = catalog["ticker"].isin(research_tickers)
+    catalog["has_data"] = catalog["ticker"].map(lambda value: _file_for(value).exists())
+    return catalog
+
+
 def normalize_ticker(ticker: str) -> str:
     value = ticker.strip().upper()
     if value.endswith(".JK") and value != "^JKSE":
         value = value[:-3]
-    universe = set(pd.read_csv(UNIVERSE_PATH)["ticker"].tolist())
-    if value != "^JKSE" and value not in universe:
-        raise KeyError(f"Ticker {ticker} is not in the configured IDX30 universe")
+    catalog = set(catalog_frame()["ticker"].tolist())
+    if value != "^JKSE" and value not in catalog:
+        raise KeyError(f"Ticker {ticker} is not in the official IDX stock catalog")
     if not _file_for(value).exists():
-        raise DataUnavailable("Market data is not available. Run the data refresh first.")
+        raise DataUnavailable(
+            f"No cached daily data is available for {value}. Run `python3 src/download_data.py --universe all` first."
+        )
     return value
 
 
@@ -52,10 +74,12 @@ def _read_metadata() -> dict[str, Any]:
 
 
 def data_status() -> DataStatus:
-    universe = pd.read_csv(UNIVERSE_PATH)
-    tickers = ["^JKSE", *universe["ticker"].tolist()]
-    files = {ticker: _file_for(ticker).exists() for ticker in tickers}
+    research_universe = universe.load_idx30()
+    catalog = catalog_frame()
+    research_tickers = ["^JKSE", *research_universe["ticker"].tolist()]
+    files = {ticker: _file_for(ticker).exists() for ticker in research_tickers}
     missing = [ticker for ticker, exists in files.items() if not exists]
+    missing_catalog = catalog.loc[~catalog["has_data"], "ticker"].tolist()
     metadata = _read_metadata()
     last_dates = [item.get("last_date") for item in metadata.get("files", []) if item.get("last_date")]
     last_trading_date = max(last_dates) if last_dates else None
@@ -64,12 +88,16 @@ def data_status() -> DataStatus:
         available=not missing,
         source=str(metadata.get("source", "Yahoo Finance chart API")),
         benchmark="^JKSE",
-        universe_size=len(universe),
+        universe_size=len(research_universe),
+        research_universe="IDX30",
+        catalog_size=len(catalog),
+        cached_stock_count=int(catalog["has_data"].sum()),
         fetched_at_utc=metadata.get("downloaded_at_utc"),
         requested_start=metadata.get("requested_start"),
         requested_end_exclusive=metadata.get("requested_end_exclusive"),
         last_trading_date=last_trading_date,
         missing_tickers=missing,
+        missing_catalog_tickers=missing_catalog,
         stale=stale,
     )
 
@@ -190,7 +218,26 @@ def stock_features(ticker: str, config: StrategyConfig | Mapping[str, Any] | Non
     ranking_rows = _factor_rows(score_date, score, factors)
     row = next((item for item in ranking_rows if item["ticker"] == normalized), None)
     if row is None:
-        raise KeyError(f"No completed signal is available for {ticker}")
+        frame = pd.read_csv(_file_for(normalized), parse_dates=["date"]).sort_values("date")
+        if config_dict["price_field"] not in frame or frame[config_dict["price_field"]].dropna().empty:
+            raise DataUnavailable(f"No usable {config_dict['price_field']} history is available for {normalized}")
+        daily = frame.set_index("date")[config_dict["price_field"]].dropna().astype(float)
+        monthly = research.completed_monthly_last(daily)
+        monthly_returns = monthly.pct_change().dropna()
+        latest_month = monthly_returns.index[-1] if not monthly_returns.empty else monthly.index[-1]
+        latest_month_return = monthly_returns.get(latest_month, np.nan)
+        return {
+            "ticker": normalized,
+            "signal_date": latest_month.date().isoformat(),
+            "latest": {"date": daily.index[-1].date().isoformat(), "price": _clean(daily.iloc[-1])},
+            "rank": None,
+            "score": None,
+            "selected": False,
+            "weight": 0.0,
+            "factors": {},
+            "monthly_return": _clean(latest_month_return),
+            "research_status": "outside_idx30",
+        }
     daily = prices[normalized].dropna()
     latest = {"date": daily.index[-1].date().isoformat(), "price": _clean(daily.iloc[-1])}
     monthly_returns = features["monthly_returns"]
@@ -207,6 +254,7 @@ def stock_features(ticker: str, config: StrategyConfig | Mapping[str, Any] | Non
         "weight": signal_weight,
         "factors": row["factors"],
         "monthly_return": _clean(latest_month_return),
+        "research_status": "idx30",
     }
 
 
@@ -278,6 +326,11 @@ def backtest(request: BacktestRequest) -> dict[str, Any]:
 def refresh_data() -> dict[str, object]:
     start = os.getenv("DATA_START", "2015-01-01")
     tomorrow = date.today() + timedelta(days=1)
-    manifest = download_data.download_universe(start=start, end=tomorrow.isoformat())
+    configured_universe = os.getenv("DATA_UNIVERSE", "idx30")
+    manifest = download_data.download_universe(
+        start=start,
+        end=tomorrow.isoformat(),
+        universe=configured_universe,
+    )
     clear_caches()
     return manifest

@@ -1,4 +1,4 @@
-"""Download cached daily OHLCV data for the current IDX30 research universe.
+"""Download cached daily OHLCV data for an IDX research or catalog universe.
 
 The downloader deliberately uses Yahoo Finance's chart endpoint directly so the
 research can be reproduced without a vendor-specific Python package. It is not
@@ -20,6 +20,7 @@ import requests
 
 ROOT = Path(__file__).resolve().parents[1]
 UNIVERSE_PATH = ROOT / "data" / "universe_idx30_2026-08.csv"
+ALL_UNIVERSE_PATH = ROOT / "data" / "universe_idx_all_2026-08.csv"
 OUT_DIR = ROOT / "data" / "raw" / "yahoo"
 METADATA_PATH = ROOT / "data" / "raw" / "yahoo_metadata.json"
 
@@ -34,6 +35,12 @@ def parse_args() -> argparse.Namespace:
     )
     parser.add_argument("--sleep", type=float, default=0.35, help="Seconds between requests")
     parser.add_argument("--force", action="store_true", help="Redownload existing files")
+    parser.add_argument(
+        "--universe",
+        choices=("idx30", "all"),
+        default="idx30",
+        help="Download the IDX30 research universe or all listed IDX stocks (about 962 symbols)",
+    )
     return parser.parse_args()
 
 
@@ -100,10 +107,28 @@ def fetch_chart(
     raise RuntimeError(f"Could not download {ticker} ({yahoo_ticker}): {'; '.join(errors)}")
 
 
-def download_universe(start: str = "2015-01-01", end: str = "2026-08-12", sleep_seconds: float = 0.35) -> dict[str, object]:
+def _universe_path(universe: str) -> Path:
+    if universe == "idx30":
+        return UNIVERSE_PATH
+    if universe == "all":
+        if not ALL_UNIVERSE_PATH.exists():
+            raise FileNotFoundError(
+                f"Missing {ALL_UNIVERSE_PATH}; run `python3 src/update_universe.py` first"
+            )
+        return ALL_UNIVERSE_PATH
+    raise ValueError(f"Unsupported universe: {universe}")
+
+
+def download_universe(
+    start: str = "2015-01-01",
+    end: str = "2026-08-12",
+    sleep_seconds: float = 0.35,
+    universe: str = "idx30",
+) -> dict[str, object]:
     """Refresh the configured universe and return a compact refresh manifest."""
-    universe = pd.read_csv(UNIVERSE_PATH)
-    tickers = ["^JKSE", *universe["ticker"].tolist()]
+    universe_path = _universe_path(universe)
+    universe_frame = pd.read_csv(universe_path)
+    tickers = ["^JKSE", *universe_frame["ticker"].tolist()]
     OUT_DIR.mkdir(parents=True, exist_ok=True)
     session = requests.Session()
     session.headers.update({"User-Agent": "beat-the-market research/0.1"})
@@ -130,7 +155,8 @@ def download_universe(start: str = "2015-01-01", end: str = "2026-08-12", sleep_
         "requested_start": start,
         "requested_end_exclusive": end,
         "benchmark": "^JKSE",
-        "universe_file": str(UNIVERSE_PATH.relative_to(ROOT)),
+        "universe": universe,
+        "universe_file": str(universe_path.relative_to(ROOT)),
         "files": downloaded,
     }
     METADATA_PATH.write_text(json.dumps(metadata, indent=2), encoding="utf-8")
@@ -144,7 +170,8 @@ def main() -> None:
     if end <= start:
         raise SystemExit("--end must be after --start")
 
-    universe = pd.read_csv(UNIVERSE_PATH)
+    universe_path = _universe_path(args.universe)
+    universe = pd.read_csv(universe_path)
     tickers = ["^JKSE", *universe["ticker"].tolist()]
     OUT_DIR.mkdir(parents=True, exist_ok=True)
     session = requests.Session()
@@ -181,7 +208,8 @@ def main() -> None:
         "requested_start": args.start,
         "requested_end_exclusive": args.end,
         "benchmark": "^JKSE",
-        "universe_file": str(UNIVERSE_PATH.relative_to(ROOT)),
+        "universe": args.universe,
+        "universe_file": str(universe_path.relative_to(ROOT)),
         "files": downloaded,
     }
     METADATA_PATH.write_text(json.dumps(metadata, indent=2), encoding="utf-8")

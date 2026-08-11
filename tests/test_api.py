@@ -19,6 +19,16 @@ def test_health_and_default_strategy() -> None:
     assert sum(item["weight"] for item in response.json()["factors"]) == pytest.approx(1.0)
 
 
+def test_universe_exposes_full_idx_catalog() -> None:
+    response = client.get("/api/universe")
+    assert response.status_code == 200
+    payload = response.json()
+    assert payload["research_universe"] == "IDX30"
+    assert len(payload["stocks"]) == 962
+    assert {item["ticker"] for item in payload["stocks"]} >= {"BBCA", "GOTO"}
+    assert all("has_data" in item for item in payload["stocks"])
+
+
 @pytest.mark.skipif(not DATA_READY, reason="download the local market snapshot first")
 def test_rankings_and_stock_features_use_cached_data() -> None:
     rankings = client.get("/api/rankings")

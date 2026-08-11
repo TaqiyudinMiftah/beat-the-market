@@ -6,8 +6,13 @@ not investment advice and not a guarantee of future returns.
 
 ## Current first-pass design
 
-- Universe: the 30 stocks in the IDX30 snapshot effective 3 August–30 October
-  2026, stored in `data/universe_idx30_2026-08.csv`.
+- Research universe: the 30 stocks in the IDX30 snapshot effective 3 August–30
+  October 2026, stored in `data/universe_idx30_2026-08.csv`.
+- App catalog: all 962 stocks returned by the official IDX stock-list endpoint
+  on 12 August 2026, stored in `data/universe_idx_all_2026-08.csv`. The app can
+  display every catalog ticker, but a chart requires a locally cached price
+  file. This separation prevents an incomplete all-stock download from
+  silently changing the published IDX30 backtest.
 - Data: daily OHLCV from Yahoo Finance's chart API, cached under
   `data/raw/yahoo/`; `adjclose` is the default so splits and distributions are
   reflected in returns.
@@ -52,7 +57,26 @@ candidate set using the validation period only, then reports an untouched
 python3 src/download_data.py
 python3 src/research.py
 python3 src/robustness.py
+python3 -m src.ml_research
 ```
+
+The paper-backed ML experiment uses the optional environment in
+`requirements-ml.txt` and writes `reports/ml_research_findings.md`. It compares
+expanding-window Ridge, shallow LightGBM, an equal ensemble, an
+inverse-volatility variant, and the existing composite control. The report
+links the source papers and records validation/holdout results; it does not
+claim that any result is a live edge.
+
+Refresh the official catalog and, when a full quote snapshot is intended, use:
+
+```bash
+python3 src/update_universe.py
+python3 src/download_data.py --universe all
+```
+
+The all-stock download requests roughly 962 symbols and can take a long time or
+encounter Yahoo Finance rate limits. The default downloader remains `--universe
+idx30`; use `DATA_UNIVERSE=all` only for an intentional full refresh.
 
 Useful sensitivities:
 
@@ -91,6 +115,10 @@ The API exposes `/api/health`, `/api/data-status`, `/api/universe`,
 `/api/rankings`, `/api/strategies/default`, and `POST /api/backtests`.
 `POST /api/admin/refresh` requires the `X-Refresh-Token` header and is intended
 for a scheduler or an operator—not for an unprotected browser action.
+
+`/api/universe` returns the full IDX catalog with `has_data` and
+`in_research_universe` flags. Rankings and backtests intentionally remain on
+IDX30 until a point-in-time all-stock research panel is built.
 
 ## Deployment
 

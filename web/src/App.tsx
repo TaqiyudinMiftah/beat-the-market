@@ -130,7 +130,11 @@ function App() {
         setFeatures(nextFeatures);
       })
       .catch((reason: unknown) => {
-        if (active) setError(reason instanceof Error ? reason.message : "The stock data could not be loaded.");
+        if (active) {
+          setCandles([]);
+          setFeatures(null);
+          setError(reason instanceof Error ? reason.message : "The stock data could not be loaded.");
+        }
       })
       .finally(() => {
         if (active) setLoadingMarket(false);
@@ -213,7 +217,7 @@ function App() {
         </button>
         <div className="topbar-actions">
           <label className="ticker-picker"><span>⌕</span><select value={ticker} onChange={(event) => selectTicker(event.target.value)} aria-label="Select stock">
-            {universe.length === 0 ? <option value={ticker}>{ticker}</option> : universe.map((stock) => <option value={stock.ticker} key={stock.ticker}>{stock.ticker} · {stock.company_name}</option>)}
+            {universe.length === 0 ? <option value={ticker}>{ticker}</option> : universe.map((stock) => <option value={stock.ticker} key={stock.ticker}>{stock.ticker} · {stock.company_name}{stock.has_data ? "" : " · data not cached"}</option>)}
           </select></label>
           <div className={`status-pill ${status?.available ? "fresh" : "offline"}`}><i />{status?.available ? `EOD ${formatDate(status.last_trading_date)}` : loadingShell ? "Connecting…" : "Data needed"}</div>
           <button className="share-button" onClick={shareCurrentView}>Share view</button>
@@ -241,7 +245,7 @@ function App() {
         <main className="main-content">
           <div className="page-heading">
             <div><span className="eyebrow">Public research workspace</span><h1>{title}</h1></div>
-            <div className="page-heading-meta"><span className="live-dot" />{status?.universe_size ?? 30} stocks · IHSG benchmark</div>
+            <div className="page-heading-meta"><span className="live-dot" />{status?.catalog_size ?? status?.universe_size ?? 30} listed stocks · {status?.research_universe ?? "IDX30"} model</div>
           </div>
           {error && <div className="error-banner">{error}<button onClick={() => setError(null)} aria-label="Dismiss error">×</button></div>}
           {loadingShell ? <LoadingState /> : !status?.available ? <DataSetupState status={status} /> : view === "overview" ? <OverviewView ticker={ticker} features={features} candles={candles} rankings={rankings} selectedRanking={selectedRanking} loadingMarket={loadingMarket} onSelectTicker={selectTicker} /> : view === "workspace" ? <WorkspaceView ticker={ticker} features={features} candles={candles} loadingMarket={loadingMarket} /> : view === "lab" ? <StrategyLab strategy={strategy} onStrategyChange={setStrategy} onShare={shareCurrentView} result={backtest} onResult={setBacktest} busy={backtestBusy} setBusy={setBacktestBusy} /> : <MethodView onOpenLab={() => setView("lab")} />}
@@ -327,7 +331,7 @@ function ChartLoading({ expanded = false }: { expanded?: boolean }) {
 }
 
 function ChartEmpty() {
-  return <section className="chart-card chart-placeholder"><div className="setup-icon">⌁</div><h3>No chart data for this ticker</h3><p>Refresh the local Yahoo Finance snapshot and try again.</p></section>;
+  return <section className="chart-card chart-placeholder"><div className="setup-icon">⌁</div><h3>No local chart data for this ticker</h3><p>This symbol is in the official IDX catalog, but its Yahoo Finance history has not been cached yet.</p></section>;
 }
 
 function MethodView({ onOpenLab }: { onOpenLab: () => void }) {

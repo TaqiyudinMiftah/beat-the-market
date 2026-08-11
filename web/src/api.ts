@@ -31,7 +31,7 @@ export function getDefaultStrategy() {
 }
 
 export function getUniverse() {
-  return request<{ benchmark: string; stocks: UniverseStock[] }>("/api/universe");
+  return request<{ benchmark: string; research_universe?: string; stocks: UniverseStock[] }>("/api/universe");
 }
 
 export function getRankings(strategy: StrategyConfig) {
