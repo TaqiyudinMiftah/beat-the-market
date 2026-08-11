@@ -1,0 +1,2 @@
+model,signals,forecast_rows,median_training_rows,median_best_epoch
+mlp_rank,103,28002,20692.0,21.0

@@ -252,6 +252,27 @@ See `reports/deep_ml_findings.md` for the current gate decision. The online
 weighting rule may use only realized returns before each signal month; it never
 uses the current or later holdout return.
 
+The all-listed deep-learning audit extends that design to the current 962-ticker
+IDX catalog and a point-in-time trailing-liquidity top-300 screen. It predicts
+the next month's cross-sectional return rank with a fixed three-seed PyTorch MLP
+(32, 16 hidden units), training-only normalization, and expanding walk-forward
+refits:
+
+```bash
+PYTHONPATH=$PWD /tmp/beat-market-ml-venv/bin/python -m src.all_stock_deep_research
+PYTHONPATH=$PWD /tmp/beat-market-ml-venv/bin/python -m src.all_stock_deep_research \
+  --price-field close --output-prefix all_stock_deep_close
+```
+
+The adjusted-price report found that the pure MLP rank forecast and its causal
+online-best switch passed the predeclared cost, rolling, bootstrap, beta,
+drawdown, and turnover gate, but the validation-selected 50/50 blend did not;
+therefore no formula is promoted. The close-price replay rejected every model,
+so the result is not price-field robust. See
+`reports/all_stock_deep_findings.md` and
+`reports/all_stock_deep_close_findings.md`; both remain exploratory because the
+catalog is a current snapshot with survivorship and historical-membership bias.
+
 The forecast-stacking experiment combines the completed Chronos, TimesFM,
 Kronos, and factor-MLP forecast panels with the existing composite. It tests a
 regularized Ridge stacker, shallow LightGBM stacker, and fixed rank blends using
