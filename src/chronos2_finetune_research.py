@@ -17,7 +17,7 @@ import argparse
 import importlib.metadata
 import importlib.util
 import json
-from dataclasses import dataclass
+from dataclasses import dataclass, replace
 from datetime import date, datetime, timezone
 from pathlib import Path
 from typing import Any
@@ -97,6 +97,7 @@ class FineTuneConfig:
     device: str
     model_id: str
     max_signals: int
+    refit_annual: bool
     data_dir: Path
     universe_path: Path
     checkpoint_dir: Path
@@ -122,6 +123,11 @@ def parse_args() -> argparse.Namespace:
     parser.add_argument("--device", default="cpu")
     parser.add_argument("--model-id", default=DEFAULT_MODEL_ID)
     parser.add_argument("--max-signals", type=int, default=0)
+    parser.add_argument(
+        "--refit-annual",
+        action="store_true",
+        help="refit through the prior calendar year before each new calendar year",
+    )
     parser.add_argument("--data-dir", type=Path, default=DEFAULT_DATA_DIR)
     parser.add_argument("--universe", type=Path, default=DEFAULT_UNIVERSE_PATH)
     parser.add_argument("--checkpoint-dir", type=Path, default=DEFAULT_CHECKPOINT_DIR)
@@ -176,6 +182,15 @@ def _validate_config(config: FineTuneConfig) -> None:
 
 def _output_path(config: FineTuneConfig, suffix: str) -> Path:
     return REPORT_DIR / f"{config.output_prefix}_{suffix}"
+
+
+def fit_cutoff_for_signal(signal_date: pd.Timestamp, config: FineTuneConfig) -> str:
+    """Return the only data cutoff permitted for a signal month."""
+    initial = pd.Timestamp(config.train_end)
+    if not config.refit_annual:
+        return initial.date().isoformat()
+    prior_year_end = pd.Timestamp(year=signal_date.year - 1, month=12, day=31)
+    return max(initial, prior_year_end).date().isoformat()
 
 
 def _json_safe(value: Any) -> Any:
@@ -439,6 +454,16 @@ def _write_outputs(
         pd.concat(rows, ignore_index=True).to_csv(_output_path(config, "forecasts.csv"), index=False)
 
     control_name = f"cap{config.cap}{CONTROL_SUFFIX}"
+    fit_summary = "; ".join(
+        f"{row['train_end']}: {int(row['series'])} series"
+        for _, row in training.iterrows()
+    )
+    fit_schedule = (
+        "one frozen model through the configured cutoff"
+        if not config.refit_annual
+        else "one refit at each calendar-year boundary using only the prior year"
+    )
+    refit_flag = " \\\n  --refit-annual" if config.refit_annual else ""
     summary = {
         "run_at_utc": datetime.now(timezone.utc).isoformat(),
         "config": {
@@ -457,7 +482,7 @@ def _write_outputs(
             "chronos_forecasting": _version("chronos-forecasting"),
             "torch": _version("torch"),
         },
-        "formula": "frozen Chronos-2 model trained before 2022; top-300 eligible stocks ranked by terminal cross-learning median or lower10 forecast",
+        "formula": "Chronos-2 model trained only before each signal month; top-300 eligible stocks ranked by terminal cross-learning median or lower10 forecast",
         "sources": {
             "chronos": "https://github.com/amazon-science/chronos-forecasting",
             "chronos2_study": "https://arxiv.org/abs/2605.21504",
@@ -474,7 +499,7 @@ def _write_outputs(
 Run date: {date.today().isoformat()}<br>
 Model: {config.model_id}; chronos-forecasting: {_version("chronos-forecasting") or "unavailable"}<br>
 Universe catalog: {_relative_path(config.universe_path)}; loaded tickers: {len(loaded_tickers)}; skipped: {len(skipped)}<br>
-Fine-tuning cutoff: {config.train_end}; evaluation: {config.start} through {config.end}<br>
+Fine-tuning schedule: {fit_schedule}; evaluation: {config.start} through {config.end}<br>
 Eligibility: top {config.cap} by trailing 60-day median dollar volume; context: {config.context_days} days; horizon: {config.horizon_days} business days<br>
 Portfolio: top {config.top_k} equal-weight names; {config.cost_bps:.1f} bps one-way default cost<br>
 
@@ -484,8 +509,8 @@ This audit uses the official Chronos-2 `fit` and `predict_df` interfaces documen
 
 ## Fixed design and leakage controls
 
-- The model is fine-tuned exactly once on normalized daily log-price series with observations no later than {config.train_end}. The frozen checkpoint is then used for every evaluation month.
-- Training uses {len(training_series)} current-catalog series with at least {config.min_past + config.horizon_days} pre-cutoff observations, {config.fine_tune_steps} full-model steps, learning rate {config.learning_rate:g}, batch size {config.batch_size}, and seed {config.seed}.
+- The model schedule is fixed as {fit_schedule}; every fit uses normalized daily log-price series ending no later than its own cutoff. A model is frozen between refits.
+- Training series by cutoff: {fit_summary}. Each fit uses {config.fine_tune_steps} full-model steps, learning rate {config.learning_rate:g}, batch size {config.batch_size}, and a deterministic seed derived from {config.seed}.
 - At each completed month-end t, only the top {config.cap} names by trailing 60-day median dollar volume are forecast. Context rows are filtered to dates <= t.
 - The two recorded variants are terminal cross-learning median and terminal cross-learning 10th-percentile forecasts. Their ranks and top-{config.top_k} portfolio rule are fixed before inspecting validation or holdout results.
 - Validation is 2022–2023. 2024 and 2025–2026 are holdouts. No holdout return is used for fine-tuning, model choice, or tail selection.
@@ -509,7 +534,7 @@ Validation winner: {validation_winner or "none"}. Preferred after the fixed gate
 
 ~~~bash
 HF_HOME=/tmp/beat-market-hf PYTHONPATH=$PWD \\
-  /tmp/beat-market-ml-venv/bin/python -m src.chronos2_finetune_research
+  /tmp/beat-market-ml-venv/bin/python -m src.chronos2_finetune_research{refit_flag}
 ~~~
 
 The generated checkpoint remains outside Git at `{config.checkpoint_dir}`. Raw forecasts remain ignored in reports/{config.output_prefix}_forecasts.csv; committed tables use the `{config.output_prefix}_` prefix.
@@ -542,18 +567,46 @@ def run(config: FineTuneConfig) -> dict[str, Any]:
         signal_dates = signal_dates[: config.max_signals]
 
     frames = chronos2_daily_research._read_daily_frames(config.data_dir, loaded_tickers)
-    training_inputs, training_series = build_training_inputs(
-        frames,
-        loaded_tickers,
-        config.price_field,
-        config.train_end,
-        config.min_past + config.horizon_days,
-    )
-    print(
-        f"[chronos2-finetune] training {len(training_inputs)} series through {config.train_end}",
-        flush=True,
-    )
-    pipeline = fine_tune_pipeline(config, training_inputs)
+    cutoff_by_signal = {
+        signal_date: fit_cutoff_for_signal(signal_date, config)
+        for signal_date in signal_dates
+    }
+    pipelines: dict[str, Any] = {}
+    training_rows: list[dict[str, Any]] = []
+    training_series_frames: list[pd.DataFrame] = []
+    for cutoff in dict.fromkeys(cutoff_by_signal.values()):
+        fit_config = replace(
+            config,
+            train_end=cutoff,
+            checkpoint_dir=config.checkpoint_dir / cutoff,
+        )
+        training_inputs, training_series = build_training_inputs(
+            frames,
+            loaded_tickers,
+            config.price_field,
+            cutoff,
+            config.min_past + config.horizon_days,
+        )
+        if training_series.empty:
+            raise ValueError(f"no sufficiently long training series through {cutoff}")
+        print(
+            f"[chronos2-finetune] training {len(training_inputs)} series through {cutoff}",
+            flush=True,
+        )
+        pipelines[cutoff] = fine_tune_pipeline(fit_config, training_inputs)
+        training_rows.append(
+            {
+                "model": "chronos2_finetuned",
+                "series": len(training_inputs),
+                "median_training_observations": float(training_series["observations"].median()),
+                "min_training_observations": int(training_series["observations"].min()),
+                "max_training_observations": int(training_series["observations"].max()),
+                "train_end": cutoff,
+                "fine_tune_steps": config.fine_tune_steps,
+            }
+        )
+        training_series_frames.append(training_series.assign(train_end=cutoff))
+    training_series = pd.concat(training_series_frames, ignore_index=True)
 
     columns = sorted(monthly_prices.columns)
     panels: dict[str, pd.DataFrame] = {
@@ -581,7 +634,7 @@ def run(config: FineTuneConfig) -> dict[str, Any]:
             if len(included) < config.top_k:
                 raise ValueError(f"only {len(included)} eligible contexts available")
             forecasts = chronos2_daily_research._predict_daily(
-                pipeline,
+                pipelines[cutoff_by_signal[signal_date]],
                 context,
                 last_logs,
                 config.horizon_days,
@@ -686,19 +739,7 @@ def run(config: FineTuneConfig) -> dict[str, Any]:
                                 ),
                             }
                         )
-    training = pd.DataFrame(
-        [
-            {
-                "model": "chronos2_finetuned",
-                "series": len(training_inputs),
-                "median_training_observations": float(training_series["observations"].median()),
-                "min_training_observations": int(training_series["observations"].min()),
-                "max_training_observations": int(training_series["observations"].max()),
-                "train_end": config.train_end,
-                "fine_tune_steps": config.fine_tune_steps,
-            }
-        ]
-    )
+    training = pd.DataFrame(training_rows)
     _write_outputs(
         config=config,
         metrics=metrics,
@@ -749,6 +790,7 @@ def main() -> None:
         device=args.device,
         model_id=args.model_id,
         max_signals=args.max_signals,
+        refit_annual=args.refit_annual,
         data_dir=args.data_dir.resolve(),
         universe_path=args.universe.resolve(),
         checkpoint_dir=args.checkpoint_dir.resolve(),
