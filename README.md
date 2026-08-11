@@ -168,6 +168,18 @@ lower-tail Chronos-2 panel remained positive in both holdout blocks but failed
 validation, so the price-field comparison is mixed evidence rather than a
 reason to promote the method.
 
+The 128-day context stress is reproducible with the same output isolation:
+
+~~~bash
+HF_HOME=/tmp/beat-market-hf PYTHONPATH=$PWD \
+  /tmp/beat-market-ml-venv/bin/python -m src.chronos2_daily_research \
+  --context-days 128 --output-prefix chronos2_daily_ctx128
+~~~
+
+Its lower-tail panel also passed the fixed gate, but with lower validation
+excess than the 256-day baseline. The result supports testing the method across
+contexts while still requiring a future holdout and point-in-time universe.
+
 The paper-factor audit adapts two established cross-sectional findings to the
 long-only app: intermediate-horizon momentum and betting against beta. It uses
 an equal-weight score of 12–1 momentum, low 60-day volatility, and low
