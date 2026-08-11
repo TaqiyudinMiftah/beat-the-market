@@ -81,7 +81,13 @@ PYTHONPATH=$PWD:/tmp/Kronos /tmp/beat-market-foundation/bin/python -m src.founda
 The checked-in foundation report uses fixed model IDs, 256 daily context rows,
 a 21-day horizon, top-three selection, 25 bps costs, and 2021–2026 rolling
 signals. It keeps holdout data out of model selection. See
-`reports/foundation_model_findings.md` for the actual comparison.
+`reports/foundation_model_findings.md` for the actual comparison. The runner
+also replays the same forecasts at 0/25/50/100 bps and across fixed
+chronological blocks; the auditable tables are
+`reports/foundation_model_robustness.csv` and
+`reports/foundation_model_rolling_summary.csv`. Factor warm-up history is
+loaded before the requested evaluation window, while all reported signals are
+still restricted to the configured dates.
 
 Refresh the official catalog and, when a full quote snapshot is intended, use:
 

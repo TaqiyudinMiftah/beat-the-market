@@ -17,6 +17,9 @@ reports/*.md
 !reports/foundation_model_findings.md
 !reports/foundation_model_metrics.csv
 !reports/foundation_model_summary.json
+!reports/foundation_model_robustness.csv
+!reports/foundation_model_rolling.csv
+!reports/foundation_model_rolling_summary.csv
 web/node_modules/
 web/dist/
 web/.vite/

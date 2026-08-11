@@ -33,9 +33,9 @@ import numpy as np
 import pandas as pd
 
 try:  # Support both ``python -m src.foundation_research`` and direct execution.
-    from . import ml_research, research
+    from . import foundation_robustness, ml_research, research
 except ImportError:  # pragma: no cover - direct CLI compatibility
-    from src import ml_research, research
+    from src import foundation_robustness, ml_research, research
 
 
 ROOT = Path(__file__).resolve().parents[1]
@@ -345,6 +345,23 @@ def _signal_dates(features: dict[str, pd.DataFrame | pd.Series], config: RunConf
     return dates
 
 
+def _slice_features(
+    features: dict[str, pd.DataFrame | pd.Series],
+    start: str,
+    end: str,
+) -> dict[str, pd.DataFrame | pd.Series]:
+    """Keep the requested evaluation window after calculating warm-up features."""
+    start_date = pd.Timestamp(start)
+    end_date = pd.Timestamp(end)
+    sliced: dict[str, pd.DataFrame | pd.Series] = {}
+    for name, value in features.items():
+        if isinstance(value.index, pd.DatetimeIndex):
+            sliced[name] = value.loc[(value.index >= start_date) & (value.index <= end_date)]
+        else:  # pragma: no cover - feature frames are date-indexed today
+            sliced[name] = value
+    return sliced
+
+
 def _rank_ic(predictions: pd.DataFrame, target: pd.DataFrame) -> dict[str, float | int]:
     values: list[float] = []
     for timestamp in predictions.index:
@@ -471,11 +488,65 @@ def _format_metric(value: Any) -> str:
     return str(value)
 
 
+def _render_rolling_summary(summary: pd.DataFrame) -> str:
+    columns = (
+        "model",
+        "cost_bps",
+        "windows",
+        "median_sharpe",
+        "positive_excess_fraction",
+        "worst_excess_cagr",
+        "median_turnover",
+    )
+    if summary.empty:
+        return "_No rolling diagnostics available._"
+    lines = [
+        "| " + " | ".join(columns) + " |",
+        "|" + "|".join("---" for _ in columns) + "|",
+    ]
+    for _, row in summary.sort_values(["cost_bps", "model"]).iterrows():
+        values: list[str] = []
+        for column in columns:
+            value = row.get(column)
+            if isinstance(value, (float, np.floating)):
+                values.append("—" if not np.isfinite(value) else f"{value:.4f}")
+            else:
+                values.append(str(value))
+        lines.append("| " + " | ".join(values) + " |")
+    return "\n".join(lines)
+
+
+def _render_block_winners(winners: pd.DataFrame) -> str:
+    columns = ("period", "winner", "winner_sharpe", "baseline_sharpe")
+    if winners.empty:
+        return "_No validation block winners available._"
+    lines = [
+        "| " + " | ".join(columns) + " |",
+        "|" + "|".join("---" for _ in columns) + "|",
+    ]
+    for _, row in winners.iterrows():
+        lines.append(
+            "| "
+            + " | ".join(
+                [
+                    str(row["period"]),
+                    str(row["winner"]),
+                    _format_metric(row["winner_sharpe"]),
+                    _format_metric(row["baseline_sharpe"]),
+                ]
+            )
+            + " |"
+        )
+    return "\n".join(lines)
+
+
 def write_report(
     results: list[ForecastResult],
     baseline: dict[str, dict[str, Any]],
     config: RunConfig,
     statuses: dict[str, dict[str, Any]],
+    features: dict[str, pd.DataFrame | pd.Series],
+    baseline_scores: pd.DataFrame,
 ) -> tuple[Path, Path]:
     REPORT_DIR.mkdir(parents=True, exist_ok=True)
     rows: list[dict[str, Any]] = []
@@ -484,6 +555,47 @@ def write_report(
             rows.append({"model": result.name, **values, **{f"rank_ic_{key}": value for key, value in result.rank_ic.items()}})
     metrics_path = REPORT_DIR / "foundation_model_metrics.csv"
     pd.DataFrame(rows).to_csv(metrics_path, index=False)
+    forecast_panels = {"existing_composite": baseline_scores}
+    forecast_panels.update({result.name: result.predictions for result in results})
+    robustness = foundation_robustness.build_cost_and_block_diagnostics(
+        forecast_panels,
+        features,
+        config.top_k,
+        vol_managed_models=frozenset({"foundation_ensemble_volmanaged"}),
+    )
+    rolling = foundation_robustness.build_rolling_diagnostics(
+        forecast_panels,
+        features,
+        config.top_k,
+        cost_bps=config.cost_bps,
+        vol_managed_models=frozenset({"foundation_ensemble_volmanaged"}),
+    )
+    rolling_summary = foundation_robustness.summarize_rolling_diagnostics(rolling)
+    robustness_path = REPORT_DIR / "foundation_model_robustness.csv"
+    rolling_path = REPORT_DIR / "foundation_model_rolling.csv"
+    rolling_summary_path = REPORT_DIR / "foundation_model_rolling_summary.csv"
+    robustness.to_csv(robustness_path, index=False)
+    rolling.to_csv(rolling_path, index=False)
+    rolling_summary.to_csv(rolling_summary_path, index=False)
+    forecasts_path = REPORT_DIR / "foundation_model_forecasts.csv"
+    forecast_rows = []
+    for model, panel in forecast_panels.items():
+        values = panel.to_numpy(dtype=float)
+        row_indices, column_indices = np.where(np.isfinite(values))
+        if len(row_indices):
+            model_rows = pd.DataFrame(
+                {
+                    "signal_date": panel.index.to_numpy()[row_indices],
+                    "ticker": panel.columns.to_numpy()[column_indices],
+                    "forecast": values[row_indices, column_indices],
+                }
+            )
+            model_rows.insert(0, "model", model)
+            forecast_rows.append(model_rows)
+    if forecast_rows:
+        pd.concat(forecast_rows, ignore_index=True).to_csv(forecasts_path, index=False)
+    elif forecasts_path.exists():
+        forecasts_path.unlink()
     metric_results = [result for result in results if result.metrics]
     winner = None
     if metric_results:
@@ -494,6 +606,18 @@ def write_report(
                 result.metrics.get("validation", {}).get("excess_cagr", -np.inf),
             ),
         )
+    validation_winners = foundation_robustness.validation_winner_by_block(robustness)
+    focus_models = ["existing_composite"]
+    if winner is not None and winner.name not in focus_models:
+        focus_models.append(winner.name)
+    cost_focus = robustness.loc[
+        robustness["model"].isin(focus_models)
+        & robustness["period"].isin(
+            ("validation_2022_2023", "holdout_2024", "holdout_2025_2026")
+        )
+        & robustness["cost_bps"].isin((25.0, 50.0, 100.0))
+    ]
+    block_diagnostics = robustness.loc[robustness["cost_bps"].eq(config.cost_bps)]
     status_lines = []
     for name, status in statuses.items():
         status_lines.append(
@@ -543,6 +667,26 @@ These are zero-shot forecasts, not fine-tuned models. The models were not traine
 
 The foundation-model validation winner was **{winner_text}** under the pre-declared rule of highest validation Sharpe, then excess CAGR. Its holdout excess CAGR was `{_format_metric(winner_holdout)}` versus `{_format_metric(baseline_holdout)}` for the existing composite, with holdout maximum drawdown `{_format_metric(winner_holdout_drawdown)}` versus `{_format_metric(baseline_holdout_drawdown)}`. Because the validation-selected blend did not generalize, no foundation model is promoted over the existing composite. This does not establish a future edge; validation and holdout results must be stable under point-in-time constituents, costs, and additional unseen data.
 
+## Robustness protocol
+
+The same forecast panels are replayed at 0, 25, 50, and 100 bps one-way costs. Chronological blocks are fixed before looking at the results: 2021 training, 2022–2023 validation, 2024 holdout, and January 2025 through the latest available month holdout. The two holdout blocks are descriptive only and are not used to select a model. The full diagnostics are in `reports/foundation_model_robustness.csv`; raw forecasts are written locally to the ignored `reports/foundation_model_forecasts.csv` artifact.
+
+Cost stress for the validation winner and the existing composite:
+
+{foundation_robustness.render_table(cost_focus)}
+
+Chronological block results at the declared {config.cost_bps:.1f} bps cost:
+
+{foundation_robustness.render_table(block_diagnostics)}
+
+Validation-block winners (selection audit only):
+
+{_render_block_winners(validation_winners)}
+
+Rolling 12-month stability at the declared cost:
+
+{_render_rolling_summary(rolling_summary.loc[rolling_summary["cost_bps"].eq(config.cost_bps)])}
+
 {chr(10).join(result_sections)}
 
 ## Leakage and limitations
@@ -563,7 +707,7 @@ python3 -m src.foundation_research --models all
 python3 -m src.foundation_research --models chronos --max-signals 1
 ```
 
-Metrics are written to `reports/foundation_model_metrics.csv` and this report to `reports/foundation_model_findings.md`.
+Metrics are written to `reports/foundation_model_metrics.csv`, cost/block diagnostics to `reports/foundation_model_robustness.csv`, rolling diagnostics to `reports/foundation_model_rolling.csv`, and this report to `reports/foundation_model_findings.md`.
 """
     report_path = REPORT_DIR / "foundation_model_findings.md"
     report_path.write_text(report, encoding="utf-8")
@@ -589,6 +733,8 @@ Metrics are written to `reports/foundation_model_metrics.csv` and this report to
                     }
                     for result in results
                 ],
+                "robustness_rows": robustness.to_dict(orient="records"),
+                "rolling_summary": rolling_summary.to_dict(orient="records"),
             }),
             indent=2,
             allow_nan=False,
@@ -615,9 +761,9 @@ def run(config: RunConfig, model_names: list[str]) -> list[ForecastResult]:
     if config.context_days < 32 or config.horizon_days < 1:
         raise ValueError("context_days must be at least 32 and horizon_days must be positive")
     prices, volumes, tickers = research.load_prices(config.price_field)
-    prices = prices.loc[(prices.index >= config.start) & (prices.index <= config.end)]
+    prices = prices.loc[prices.index <= config.end]
     volumes = volumes.reindex(prices.index)
-    features = research.make_features(prices, volumes)
+    features = _slice_features(research.make_features(prices, volumes), config.start, config.end)
     dates = _signal_dates(features, config)
     frames = _read_daily_frames(tickers)
     statuses = package_status(config.kronos_repo)
@@ -667,7 +813,10 @@ def run(config: RunConfig, model_names: list[str]) -> list[ForecastResult]:
 
     target = features["monthly_returns"]
     assert isinstance(target, pd.DataFrame)
-    baseline_scores = research.score_frame("composite", features)
+    # Use the same valid signal calendar as the foundation forecasts. The
+    # feature frame may contain one final month-end whose next-month target is
+    # unavailable; it must not create a shorter rolling window for the control.
+    baseline_scores = research.score_frame("composite", features).reindex(index=dates)
     if len(results) >= 2:
         available_predictions = [result.predictions for result in results]
         ensemble = ml_research.ensemble_predictions(*available_predictions)
@@ -745,7 +894,7 @@ def run(config: RunConfig, model_names: list[str]) -> list[ForecastResult]:
                     forecast_count=int(blended.notna().sum().sum()),
                 )
             )
-    write_report(results, baseline_metrics, config, statuses)
+    write_report(results, baseline_metrics, config, statuses, features, baseline_scores)
     return results
 
 
