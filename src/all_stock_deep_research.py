@@ -130,6 +130,10 @@ def _output_path(config: AllStockDeepConfig, suffix: str) -> Path:
     return REPORT_DIR / f"{config.output_prefix}_{suffix}"
 
 
+def _control_name(cap: int) -> str:
+    return f"cap{cap}_composite"
+
+
 def _metric_periods(start: str, end: str) -> tuple[tuple[str, str, str], ...]:
     return (
         ("train", start, "2021-12-31"),
@@ -472,6 +476,7 @@ def run(config: AllStockDeepConfig) -> dict[str, Any]:
     )
     rank_predictions = rank_predictions.reindex(index=signal_dates)
     blend = deep_ml_research._weighted_rank_panel(baseline, rank_predictions, 0.50)
+    control_name = _control_name(config.cap)
     online_panels: dict[str, pd.DataFrame] = {}
     online_weights: dict[str, pd.Series] = {}
     for rule in ("best", "soft"):
@@ -487,7 +492,7 @@ def run(config: AllStockDeepConfig) -> dict[str, Any]:
         online_weights[f"online_{rule}"] = weights
 
     panels: dict[str, pd.DataFrame] = {
-        "cap300_composite": baseline,
+        control_name: baseline,
         "mlp_rank": rank_predictions,
         "baseline_mlp_blend_50": blend,
         **online_panels,
@@ -512,15 +517,15 @@ def run(config: AllStockDeepConfig) -> dict[str, Any]:
         cost_bps=config.cost_bps,
     )
     rolling_summary = foundation_robustness.summarize_rolling_diagnostics(rolling)
-    bootstrap = _bootstrap_rows(simulations, config.end, "cap300_composite")
+    bootstrap = _bootstrap_rows(simulations, config.end, control_name)
 
-    candidates = [name for name in panels if name != "cap300_composite"]
+    candidates = [name for name in panels if name != control_name]
     gates: dict[str, dict[str, Any]] = {}
     for name in candidates:
         passed, reasons = liquid_rank_ml_research._gate_candidate(
             name,
             metrics[name],
-            metrics["cap300_composite"],
+            metrics[control_name],
             diagnostics,
             rolling_summary,
             bootstrap,

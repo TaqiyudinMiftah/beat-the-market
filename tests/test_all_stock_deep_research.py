@@ -3,7 +3,7 @@ from __future__ import annotations
 import numpy as np
 import pandas as pd
 
-from src.all_stock_deep_research import _json_safe, build_rank_target_panel
+from src.all_stock_deep_research import _control_name, _json_safe, build_rank_target_panel
 
 
 def test_json_safe_serializes_pandas_timestamps_and_paths() -> None:
@@ -16,6 +16,11 @@ def test_json_safe_serializes_pandas_timestamps_and_paths() -> None:
 
     assert safe["timestamp"] == "2024-01-31T00:00:00"
     assert safe["path"] == __file__
+
+
+def test_control_name_tracks_liquidity_cap() -> None:
+    assert _control_name(150) == "cap150_composite"
+    assert _control_name(500) == "cap500_composite"
 
 
 def test_build_rank_target_panel_ranks_only_same_signal_date_and_keeps_excess_target() -> None:
