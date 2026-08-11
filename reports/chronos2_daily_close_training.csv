@@ -1,0 +1,2 @@
+model,signals,forecast_rows,median_training_rows
+cap300_rank_ridge,87,23741,12705.0

@@ -155,6 +155,19 @@ none because the full validation-selection winner (`cap300_rank_ridge`) failed
 the gate. This result needs point-in-time universe data and future holdout
 validation before it can be considered for the app.
 
+The same protocol can be replayed on raw closes without replacing the baseline:
+
+~~~bash
+HF_HOME=/tmp/beat-market-hf PYTHONPATH=$PWD \
+  /tmp/beat-market-ml-venv/bin/python -m src.chronos2_daily_research \
+  --price-field close --output-prefix chronos2_daily_close
+~~~
+
+That replay is stored in `reports/chronos2_daily_close_findings.md`. Its
+lower-tail Chronos-2 panel remained positive in both holdout blocks but failed
+validation, so the price-field comparison is mixed evidence rather than a
+reason to promote the method.
+
 The paper-factor audit adapts two established cross-sectional findings to the
 long-only app: intermediate-horizon momentum and betting against beta. It uses
 an equal-weight score of 12–1 momentum, low 60-day volatility, and low
