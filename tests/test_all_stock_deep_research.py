@@ -3,7 +3,19 @@ from __future__ import annotations
 import numpy as np
 import pandas as pd
 
-from src.all_stock_deep_research import build_rank_target_panel
+from src.all_stock_deep_research import _json_safe, build_rank_target_panel
+
+
+def test_json_safe_serializes_pandas_timestamps_and_paths() -> None:
+    value = {
+        "timestamp": pd.Timestamp("2024-01-31"),
+        "path": __file__,
+    }
+
+    safe = _json_safe(value)
+
+    assert safe["timestamp"] == "2024-01-31T00:00:00"
+    assert safe["path"] == __file__
 
 
 def test_build_rank_target_panel_ranks_only_same_signal_date_and_keeps_excess_target() -> None:

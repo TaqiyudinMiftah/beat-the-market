@@ -174,6 +174,14 @@ def _json_safe(value: Any) -> Any:
         return {str(key): _json_safe(item) for key, item in value.items()}
     if isinstance(value, (list, tuple)):
         return [_json_safe(item) for item in value]
+    if isinstance(value, Path):
+        return str(value)
+    if value is pd.NaT:
+        return None
+    if isinstance(value, (pd.Timestamp, datetime, date)):
+        return value.isoformat()
+    if isinstance(value, np.datetime64):
+        return pd.Timestamp(value).isoformat()
     if isinstance(value, np.generic):
         return _json_safe(value.item())
     if isinstance(value, float) and not np.isfinite(value):
