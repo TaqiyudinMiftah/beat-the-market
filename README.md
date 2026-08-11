@@ -273,6 +273,13 @@ so the result is not price-field robust. See
 `reports/all_stock_deep_close_findings.md`; both remain exploratory because the
 catalog is a current snapshot with survivorship and historical-membership bias.
 
+Liquidity-cap stress is isolated in `reports/all_stock_deep_cap150_findings.md`
+and `reports/all_stock_deep_cap500_findings.md`. The top-150 replay failed in
+validation, 2025–2026 excess, rolling stability, and bootstrap checks. The
+top-500 replay produced positive MLP holdout excess but failed the rolling or
+bootstrap gate. This sensitivity means the top-300 result is not yet a
+universe-robust formula.
+
 The forecast-stacking experiment combines the completed Chronos, TimesFM,
 Kronos, and factor-MLP forecast panels with the existing composite. It tests a
 regularized Ridge stacker, shallow LightGBM stacker, and fixed rank blends using
