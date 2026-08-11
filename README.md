@@ -185,6 +185,12 @@ The top-150 liquidity-universe stress is recorded in
 holdout checks, showing that the top-300 result is sensitive to the current
 catalog's liquidity proxy and is not yet a universe-robust strategy.
 
+The complementary top-500 stress is in
+`reports/chronos2_daily_cap500_findings.md`. It also failed the fixed gate
+because the lower-tail panel did not beat its matching top-500 control in
+validation. The individual top-300 result is therefore treated as an
+exploratory signal, not a formula ready for deployment.
+
 The paper-factor audit adapts two established cross-sectional findings to the
 long-only app: intermediate-horizon momentum and betting against beta. It uses
 an equal-weight score of 12–1 momentum, low 60-day volatility, and low

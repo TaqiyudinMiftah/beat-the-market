@@ -115,6 +115,16 @@ reports/*.md
 !reports/chronos2_daily_cap150_context.csv
 !reports/chronos2_daily_cap150_training.csv
 !reports/chronos2_daily_cap150_summary.json
+!reports/chronos2_daily_cap500_findings.md
+!reports/chronos2_daily_cap500_metrics.csv
+!reports/chronos2_daily_cap500_bootstrap.csv
+!reports/chronos2_daily_cap500_robustness.csv
+!reports/chronos2_daily_cap500_rolling.csv
+!reports/chronos2_daily_cap500_rolling_summary.csv
+!reports/chronos2_daily_cap500_sensitivity.csv
+!reports/chronos2_daily_cap500_context.csv
+!reports/chronos2_daily_cap500_training.csv
+!reports/chronos2_daily_cap500_summary.json
 web/node_modules/
 web/dist/
 web/.vite/
