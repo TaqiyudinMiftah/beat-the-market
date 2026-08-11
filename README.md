@@ -138,6 +138,28 @@ predeclared validation gate; the lower-tail variant was less fragile but still
 failed. This negative result is retained as a guard against promoting a
 foundation model merely because it is newer or more complex.
 
+The paper-factor audit adapts two established cross-sectional findings to the
+long-only app: intermediate-horizon momentum and betting against beta. It uses
+an equal-weight score of 12–1 momentum, low 60-day volatility, and low
+252-trading-day beta to IHSG within the trailing-liquidity top-300 screen:
+
+~~~text
+score = (rank(momentum_12_to_1)
+       + rank(-volatility_60d)
+       + rank(-beta_252d_vs_IHSG)) / 3
+~~~
+
+Run the fixed audit with:
+
+~~~bash
+PYTHONPATH=$PWD /tmp/beat-market-ml-venv/bin/python -m src.paper_factor_research
+~~~
+
+See `reports/paper_factor_findings.md`. The BAB paper's original portfolio is
+long-short and leveraged, so this is a clearly labelled long-only adaptation,
+not a literal reproduction. The formula is kept separate from the app until a
+point-in-time universe and future unseen data support it.
+
 The deep-learning experiment is a separate optional CPU run. It trains a small
 three-seed factor MLP with an internal historical validation slice, then tests
 fixed blends and causal online weighting against the existing composite:

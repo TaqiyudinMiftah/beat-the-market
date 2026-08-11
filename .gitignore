@@ -65,6 +65,16 @@ reports/*.md
 !reports/chronos2_sensitivity.csv
 !reports/chronos2_context.csv
 !reports/chronos2_summary.json
+!reports/paper_factor_findings.md
+!reports/paper_factor_metrics.csv
+!reports/paper_factor_bootstrap.csv
+!reports/paper_factor_robustness.csv
+!reports/paper_factor_rolling.csv
+!reports/paper_factor_rolling_summary.csv
+!reports/paper_factor_sensitivity.csv
+!reports/paper_factor_context.csv
+!reports/paper_factor_training.csv
+!reports/paper_factor_summary.json
 web/node_modules/
 web/dist/
 web/.vite/
