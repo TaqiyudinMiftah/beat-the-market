@@ -1,0 +1,3 @@
+model,signals,forecast_rows,median_training_rows
+ridge,124,80117,32919.0
+lightgbm,124,80117,32919.0

@@ -810,9 +810,10 @@ Errors/skips: `{json.dumps(errors, sort_keys=True)}`.
 ## Reproduction
 
 ```bash
-python3 -m src.foundation_research --models all
+python3 -m src.foundation_research --models all --start {config.start} --end {config.end} --kronos-repo /tmp/Kronos
 PYTHONPATH=$PWD /tmp/beat-market-deep/bin/python -m src.deep_ml_research
-PYTHONPATH=$PWD /tmp/beat-market-ml-venv/bin/python -m src.stacked_research
+PYTHONPATH=$PWD /tmp/beat-market-ml-venv/bin/python -m src.stacked_research \
+  --start {config.start} --end {config.end} --min-train-months {config.min_train_months}
 ```
 
 The raw stack forecasts are written locally to ignored `reports/stacked_model_forecasts.csv`. Committed audit artifacts are `reports/stacked_model_findings.md`, `reports/stacked_model_metrics.csv`, `reports/stacked_model_robustness.csv`, `reports/stacked_model_rolling_summary.csv`, `reports/stacked_model_bootstrap.csv`, and `reports/stacked_model_training.csv`.

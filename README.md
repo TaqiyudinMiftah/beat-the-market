@@ -67,6 +67,24 @@ inverse-volatility variant, and the existing composite control. The report
 links the source papers and records validation/holdout results; it does not
 claim that any result is a live edge.
 
+The broader current-catalog experiment applies the same paper-backed
+cross-sectional comparison to all 962 tickers returned by the IDX catalog. It
+uses the separately cached `data/raw/yahoo_all/` directory so it cannot change
+the published IDX30 backtest by accident:
+
+```bash
+python3 src/download_data.py --universe all --start 2015-01-01 \
+  --end 2026-08-12 --output-dir data/raw/yahoo_all \
+  --metadata-path data/raw/yahoo_all_metadata.json --continue-on-error
+PYTHONPATH=$PWD /tmp/beat-market-ml-venv/bin/python -m src.all_stock_ml_research
+```
+
+See `reports/all_stock_ml_findings.md` and its committed CSV tables for the
+walk-forward LightGBM/Ridge comparison, fixed top-K sensitivity, costs,
+rolling windows, and bootstrap diagnostics. The catalog is a current snapshot,
+not a point-in-time universe; its results are exploratory and are not promoted
+to the app or live trading.
+
 The foundation-model runner executes real zero-shot rolling forecasts from
 Chronos, TimesFM, and Kronos in a separate heavyweight CPU environment:
 

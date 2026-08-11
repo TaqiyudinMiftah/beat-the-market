@@ -2,6 +2,8 @@ __pycache__/
 *.py[cod]
 .venv/
 data/raw/yahoo/*.csv
+data/raw/yahoo_all/
+data/raw/yahoo_all_metadata.json
 data/raw/*.pdf
 data/processed/
 reports/*.json
@@ -36,6 +38,15 @@ reports/*.md
 !reports/stacked_model_rolling_summary.csv
 !reports/stacked_model_training.csv
 !reports/stacked_model_summary.json
+!reports/all_stock_ml_findings.md
+!reports/all_stock_ml_metrics.csv
+!reports/all_stock_ml_bootstrap.csv
+!reports/all_stock_ml_robustness.csv
+!reports/all_stock_ml_rolling.csv
+!reports/all_stock_ml_rolling_summary.csv
+!reports/all_stock_ml_training.csv
+!reports/all_stock_ml_summary.json
+!reports/all_stock_ml_sensitivity.csv
 web/node_modules/
 web/dist/
 web/.vite/

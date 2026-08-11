@@ -703,8 +703,8 @@ Rolling 12-month stability at the declared cost:
 Install CPU PyTorch first, then the optional packages. For Kronos, clone the official repository and pass its path with `--kronos-repo`.
 
 ```bash
-python3 -m src.foundation_research --models all
-python3 -m src.foundation_research --models chronos --max-signals 1
+python3 -m src.foundation_research --models all --start {config.start} --end {config.end} --kronos-repo /tmp/Kronos
+python3 -m src.foundation_research --models chronos --start {config.start} --end {config.end} --max-signals 1
 ```
 
 Metrics are written to `reports/foundation_model_metrics.csv`, cost/block diagnostics to `reports/foundation_model_robustness.csv`, rolling diagnostics to `reports/foundation_model_rolling.csv`, and this report to `reports/foundation_model_findings.md`.

@@ -5,7 +5,7 @@ Research universe: `data/universe_idx30_2026-08.csv`<br>
 Signal: daily history through completed month-end `t`; forecast next 21 trading days; hold next completed month<br>
 Price field: `adjclose` for Chronos/TimesFM; raw OHLCV for Kronos<br>
 Context: 256 daily observations; top K: 3; cost: 25.0 bps one-way<br>
-Device: `cpu`; signals: 2021-01-01 through 2026-08-11
+Device: `cpu`; signals: 2016-01-01 through 2026-08-11
 
 ## Model sources
 
@@ -25,42 +25,42 @@ These are zero-shot forecasts, not fine-tuned models. The models were not traine
 
 | model | period | months | strategy_cagr | benchmark_cagr | excess_cagr | sharpe | max_drawdown | turnover |
 |---|---|---|---|---|---|---|---|---|
-| existing_composite | train | 12 | 0.2915 | 0.1311 | 0.1604 | 0.9625 | -0.1137 | 0.4583 |
+| existing_composite | train | 72 | 0.6364 | 0.0623 | 0.5742 | 1.3547 | -0.3810 | 0.3495 |
 | existing_composite | validation | 24 | 0.2322 | 0.0426 | 0.1896 | 0.8336 | -0.2245 | 0.2917 |
 | existing_composite | holdout | 30 | 0.1510 | -0.0563 | 0.2073 | 0.5463 | -0.3684 | 0.3444 |
-| existing_composite | full | 66 | 0.2049 | 0.0113 | 0.1936 | 0.7140 | -0.3684 | 0.3460 |
-| chronos | train | 12 | 0.1631 | 0.1311 | 0.0320 | 0.6026 | -0.1506 | 0.5833 |
+| existing_composite | full | 126 | 0.4258 | 0.0291 | 0.3967 | 1.0819 | -0.3810 | 0.3373 |
+| chronos | train | 72 | 0.4976 | 0.0623 | 0.4353 | 1.1521 | -0.5461 | 0.5741 |
 | chronos | validation | 24 | 0.0484 | 0.0426 | 0.0058 | 0.3061 | -0.2918 | 0.7083 |
 | chronos | holdout | 30 | 0.1301 | -0.0563 | 0.1864 | 0.5021 | -0.5323 | 0.6889 |
-| chronos | full | 66 | 0.1055 | 0.0113 | 0.0942 | 0.4589 | -0.5323 | 0.6768 |
-| timesfm | train | 12 | 0.1778 | 0.1311 | 0.0467 | 0.5921 | -0.2294 | 0.7500 |
+| chronos | full | 126 | 0.3085 | 0.0291 | 0.2794 | 0.8584 | -0.5461 | 0.6270 |
+| timesfm | train | 72 | 0.4069 | 0.0623 | 0.3447 | 1.1114 | -0.3097 | 0.7269 |
 | timesfm | validation | 24 | -0.1492 | 0.0426 | -0.1918 | -0.3868 | -0.5229 | 0.6389 |
 | timesfm | holdout | 30 | 0.0474 | -0.0563 | 0.1037 | 0.3024 | -0.2758 | 0.6889 |
-| timesfm | full | 66 | -0.0079 | 0.0113 | -0.0192 | 0.1181 | -0.5732 | 0.6818 |
-| kronos | train | 12 | -0.0088 | 0.1311 | -0.1399 | 0.0588 | -0.2005 | 0.7222 |
+| timesfm | full | 126 | 0.1917 | 0.0291 | 0.1626 | 0.6836 | -0.5732 | 0.7011 |
+| kronos | train | 72 | 0.2250 | 0.0623 | 0.1627 | 0.7205 | -0.5451 | 0.7222 |
 | kronos | validation | 24 | -0.0123 | 0.0426 | -0.0549 | 0.0925 | -0.3025 | 0.6667 |
 | kronos | holdout | 30 | 0.1060 | -0.0563 | 0.1623 | 0.4832 | -0.3059 | 0.7222 |
-| kronos | full | 66 | 0.0405 | 0.0113 | 0.0292 | 0.2805 | -0.4280 | 0.7020 |
-| foundation_ensemble | train | 12 | 0.0471 | 0.1311 | -0.0840 | 0.2897 | -0.2049 | 0.7222 |
+| kronos | full | 126 | 0.1475 | 0.0291 | 0.1184 | 0.5683 | -0.5451 | 0.7116 |
+| foundation_ensemble | train | 72 | 0.3460 | 0.0623 | 0.2838 | 1.0610 | -0.3957 | 0.7315 |
 | foundation_ensemble | validation | 24 | -0.0095 | 0.0426 | -0.0521 | 0.0834 | -0.2458 | 0.7639 |
 | foundation_ensemble | holdout | 30 | 0.0430 | -0.0563 | 0.0993 | 0.2855 | -0.2659 | 0.7556 |
-| foundation_ensemble | full | 66 | 0.0243 | 0.0113 | 0.0130 | 0.2177 | -0.3048 | 0.7525 |
-| foundation_ensemble_volmanaged | train | 12 | 0.0623 | 0.1311 | -0.0689 | 0.3510 | -0.1795 | 0.7139 |
+| foundation_ensemble | full | 126 | 0.1948 | 0.0291 | 0.1658 | 0.7319 | -0.3957 | 0.7434 |
+| foundation_ensemble_volmanaged | train | 72 | 0.3009 | 0.0623 | 0.2386 | 1.0129 | -0.3559 | 0.6467 |
 | foundation_ensemble_volmanaged | validation | 24 | -0.0095 | 0.0426 | -0.0521 | 0.0834 | -0.2458 | 0.7639 |
 | foundation_ensemble_volmanaged | holdout | 30 | 0.0210 | -0.0563 | 0.0773 | 0.2036 | -0.2172 | 0.5948 |
-| foundation_ensemble_volmanaged | full | 66 | 0.0171 | 0.0113 | 0.0058 | 0.1831 | -0.2703 | 0.6779 |
-| composite_chronos_blend_25 | train | 12 | 0.1188 | 0.1311 | -0.0124 | 0.4971 | -0.2263 | 0.5000 |
+| foundation_ensemble_volmanaged | full | 126 | 0.1658 | 0.0291 | 0.1367 | 0.6953 | -0.3559 | 0.6567 |
+| composite_chronos_blend_25 | train | 72 | 0.5873 | 0.0623 | 0.5250 | 1.2633 | -0.3615 | 0.3611 |
 | composite_chronos_blend_25 | validation | 24 | 0.2277 | 0.0426 | 0.1851 | 0.7997 | -0.2051 | 0.3611 |
 | composite_chronos_blend_25 | holdout | 30 | 0.1420 | -0.0563 | 0.1983 | 0.5292 | -0.3558 | 0.4222 |
-| composite_chronos_blend_25 | full | 66 | 0.1681 | 0.0113 | 0.1568 | 0.6215 | -0.3558 | 0.4141 |
-| composite_chronos_blend_50 | train | 12 | 0.1779 | 0.1311 | 0.0468 | 0.7052 | -0.1907 | 0.5833 |
+| composite_chronos_blend_25 | full | 126 | 0.3975 | 0.0291 | 0.3684 | 1.0217 | -0.3615 | 0.3757 |
+| composite_chronos_blend_50 | train | 72 | 0.6648 | 0.0623 | 0.6025 | 1.4768 | -0.2158 | 0.4120 |
 | composite_chronos_blend_50 | validation | 24 | 0.3786 | 0.0426 | 0.3360 | 1.0965 | -0.1839 | 0.4444 |
 | composite_chronos_blend_50 | holdout | 30 | 0.0088 | -0.0563 | 0.0651 | 0.2091 | -0.5122 | 0.5000 |
-| composite_chronos_blend_50 | full | 66 | 0.1624 | 0.0113 | 0.1511 | 0.5962 | -0.5122 | 0.4949 |
-| composite_chronos_blend_75 | train | 12 | 0.0990 | 0.1311 | -0.0322 | 0.4358 | -0.1506 | 0.5278 |
+| composite_chronos_blend_50 | full | 126 | 0.4255 | 0.0291 | 0.3964 | 1.0992 | -0.5122 | 0.4392 |
+| composite_chronos_blend_75 | train | 72 | 0.6941 | 0.0623 | 0.6318 | 1.4327 | -0.2873 | 0.4630 |
 | composite_chronos_blend_75 | validation | 24 | 0.4912 | 0.0426 | 0.4486 | 1.3081 | -0.1700 | 0.5139 |
 | composite_chronos_blend_75 | holdout | 30 | 0.0133 | -0.0563 | 0.0695 | 0.2424 | -0.5737 | 0.5889 |
-| composite_chronos_blend_75 | full | 66 | 0.1835 | 0.0113 | 0.1722 | 0.6375 | -0.5737 | 0.5505 |
+| composite_chronos_blend_75 | full | 126 | 0.4630 | 0.0291 | 0.4339 | 1.1211 | -0.5737 | 0.5026 |
 
 The foundation-model validation winner was **composite_chronos_blend_75** under the pre-declared rule of highest validation Sharpe, then excess CAGR. Its holdout excess CAGR was `0.0695` versus `0.2073` for the existing composite, with holdout maximum drawdown `-0.5737` versus `-0.3684`. Because the validation-selected blend did not generalize, no foundation model is promoted over the existing composite. This does not establish a future edge; validation and holdout results must be stable under point-in-time constituents, costs, and additional unseen data.
 
@@ -113,15 +113,15 @@ Chronological block results at the declared 25.0 bps cost:
 | foundation_ensemble_volmanaged | 25.0000 | holdout_2025_2026 | 18 | 0.0912 | 0.1252 | -0.1447 | 0.5376 |
 | kronos | 25.0000 | holdout_2025_2026 | 18 | 0.5086 | 1.2378 | -0.1909 | 0.7593 |
 | timesfm | 25.0000 | holdout_2025_2026 | 18 | 0.1088 | 0.2206 | -0.2758 | 0.6667 |
-| chronos | 25.0000 | train_2021 | 12 | 0.0320 | 0.6026 | -0.1506 | 0.5833 |
-| composite_chronos_blend_25 | 25.0000 | train_2021 | 12 | -0.0124 | 0.4971 | -0.2263 | 0.5000 |
-| composite_chronos_blend_50 | 25.0000 | train_2021 | 12 | 0.0468 | 0.7052 | -0.1907 | 0.5833 |
-| composite_chronos_blend_75 | 25.0000 | train_2021 | 12 | -0.0322 | 0.4358 | -0.1506 | 0.5278 |
-| existing_composite | 25.0000 | train_2021 | 12 | 0.1590 | 0.9603 | -0.1137 | 0.5000 |
-| foundation_ensemble | 25.0000 | train_2021 | 12 | -0.0840 | 0.2897 | -0.2049 | 0.7222 |
-| foundation_ensemble_volmanaged | 25.0000 | train_2021 | 12 | -0.0689 | 0.3510 | -0.1795 | 0.7139 |
-| kronos | 25.0000 | train_2021 | 12 | -0.1399 | 0.0588 | -0.2005 | 0.7222 |
-| timesfm | 25.0000 | train_2021 | 12 | 0.0467 | 0.5921 | -0.2294 | 0.7500 |
+| chronos | 25.0000 | train_2021 | 12 | 0.0337 | 0.6064 | -0.1506 | 0.5278 |
+| composite_chronos_blend_25 | 25.0000 | train_2021 | 12 | -0.0108 | 0.5010 | -0.2263 | 0.4444 |
+| composite_chronos_blend_50 | 25.0000 | train_2021 | 12 | 0.0485 | 0.7092 | -0.1907 | 0.5278 |
+| composite_chronos_blend_75 | 25.0000 | train_2021 | 12 | -0.0306 | 0.4399 | -0.1506 | 0.4722 |
+| existing_composite | 25.0000 | train_2021 | 12 | 0.1608 | 0.9632 | -0.1137 | 0.4444 |
+| foundation_ensemble | 25.0000 | train_2021 | 12 | -0.0832 | 0.2925 | -0.2049 | 0.6944 |
+| foundation_ensemble_volmanaged | 25.0000 | train_2021 | 12 | -0.0010 | 0.6454 | -0.1093 | 0.5893 |
+| kronos | 25.0000 | train_2021 | 12 | -0.1384 | 0.0663 | -0.2005 | 0.6667 |
+| timesfm | 25.0000 | train_2021 | 12 | 0.0476 | 0.5938 | -0.2294 | 0.7222 |
 | chronos | 25.0000 | validation_2022_2023 | 24 | 0.0058 | 0.3061 | -0.2918 | 0.7083 |
 | composite_chronos_blend_25 | 25.0000 | validation_2022_2023 | 24 | 0.1851 | 0.7997 | -0.2051 | 0.3611 |
 | composite_chronos_blend_50 | 25.0000 | validation_2022_2023 | 24 | 0.3360 | 1.0965 | -0.1839 | 0.4444 |
@@ -136,68 +136,68 @@ Validation-block winners (selection audit only):
 
 | period | winner | winner_sharpe | baseline_sharpe |
 |---|---|---|---|
-| train_2021 | existing_composite | 0.9603 | 0.9603 |
+| train_2021 | existing_composite | 0.9632 | 0.9632 |
 | validation_2022_2023 | composite_chronos_blend_75 | 1.3081 | 0.8336 |
 
 Rolling 12-month stability at the declared cost:
 
 | model | cost_bps | windows | median_sharpe | positive_excess_fraction | worst_excess_cagr | median_turnover |
 |---|---|---|---|---|---|---|
-| chronos | 25.0000 | 55 | 0.7064 | 0.7636 | -0.3067 | 0.6944 |
-| composite_chronos_blend_25 | 25.0000 | 55 | 0.8246 | 0.7636 | -0.1880 | 0.3889 |
-| composite_chronos_blend_50 | 25.0000 | 55 | 0.8456 | 0.9091 | -0.1445 | 0.4722 |
-| composite_chronos_blend_75 | 25.0000 | 55 | 1.1469 | 0.8727 | -0.1864 | 0.5278 |
-| existing_composite | 25.0000 | 55 | 0.8075 | 0.6909 | -0.3344 | 0.3333 |
-| foundation_ensemble | 25.0000 | 55 | 0.1534 | 0.4545 | -0.3159 | 0.7500 |
-| foundation_ensemble_volmanaged | 25.0000 | 55 | 0.0624 | 0.4545 | -0.2994 | 0.7139 |
-| kronos | 25.0000 | 55 | 0.1774 | 0.4000 | -0.3210 | 0.6944 |
-| timesfm | 25.0000 | 55 | 0.2708 | 0.4727 | -0.4662 | 0.6944 |
+| chronos | 25.0000 | 115 | 0.9645 | 0.7565 | -0.5287 | 0.6667 |
+| composite_chronos_blend_25 | 25.0000 | 115 | 1.0386 | 0.8435 | -0.1880 | 0.3611 |
+| composite_chronos_blend_50 | 25.0000 | 115 | 1.1448 | 0.9043 | -0.1862 | 0.4444 |
+| composite_chronos_blend_75 | 25.0000 | 115 | 1.2468 | 0.8783 | -0.2555 | 0.5278 |
+| existing_composite | 25.0000 | 115 | 1.1108 | 0.7913 | -0.3344 | 0.3333 |
+| foundation_ensemble | 25.0000 | 115 | 0.3076 | 0.5826 | -0.3159 | 0.7500 |
+| foundation_ensemble_volmanaged | 25.0000 | 115 | 0.1823 | 0.5478 | -0.2994 | 0.6933 |
+| kronos | 25.0000 | 115 | 0.4205 | 0.5217 | -0.3210 | 0.6944 |
+| timesfm | 25.0000 | 115 | 0.5938 | 0.6261 | -0.4662 | 0.6944 |
 
 ### chronos
 
-Forecasts: 1,790 symbol-months across 66 signal months. Mean rank IC: 0.0256; positive rank-IC fraction: 0.5303.
+Forecasts: 3,284 symbol-months across 126 signal months. Mean rank IC: 0.0416; positive rank-IC fraction: 0.5476.
 
 Model ID: `amazon/chronos-bolt-tiny`. Package versions: `{"chronos-forecasting": "2.3.1", "timesfm": "2.0.2", "torch": "2.5.1+cpu"}`.
 Errors/skips: 0.
 ### timesfm
 
-Forecasts: 1,790 symbol-months across 66 signal months. Mean rank IC: -0.0058; positive rank-IC fraction: 0.3939.
+Forecasts: 3,284 symbol-months across 126 signal months. Mean rank IC: 0.0236; positive rank-IC fraction: 0.4921.
 
 Model ID: `google/timesfm-2.5-200m-pytorch`. Package versions: `{"chronos-forecasting": "2.3.1", "timesfm": "2.0.2", "torch": "2.5.1+cpu"}`.
 Errors/skips: 0.
 ### kronos
 
-Forecasts: 1,790 symbol-months across 66 signal months. Mean rank IC: 0.0027; positive rank-IC fraction: 0.4545.
+Forecasts: 3,284 symbol-months across 126 signal months. Mean rank IC: 0.0106; positive rank-IC fraction: 0.5317.
 
 Model ID: `NeoQuasar/Kronos-mini`. Package versions: `{"chronos-forecasting": "2.3.1", "timesfm": "2.0.2", "torch": "2.5.1+cpu"}`.
 Errors/skips: 0.
 ### foundation_ensemble
 
-Forecasts: 1,790 symbol-months across 66 signal months. Mean rank IC: 0.0122; positive rank-IC fraction: 0.5455.
+Forecasts: 3,284 symbol-months across 126 signal months. Mean rank IC: 0.0387; positive rank-IC fraction: 0.5952.
 
 Model ID: `equal rank ensemble`. Package versions: `{"chronos-forecasting": "2.3.1", "timesfm": "2.0.2", "torch": "2.5.1+cpu"}`.
 Errors/skips: 0.
 ### foundation_ensemble_volmanaged
 
-Forecasts: 1,790 symbol-months across 66 signal months. Mean rank IC: 0.0122; positive rank-IC fraction: 0.5455.
+Forecasts: 3,284 symbol-months across 126 signal months. Mean rank IC: 0.0387; positive rank-IC fraction: 0.5952.
 
 Model ID: `equal rank ensemble + fixed 10% volatility target`. Package versions: `{"chronos-forecasting": "2.3.1", "timesfm": "2.0.2", "torch": "2.5.1+cpu"}`.
 Errors/skips: 0.
 ### composite_chronos_blend_25
 
-Forecasts: 1,794 symbol-months across 66 signal months. Mean rank IC: 0.0032; positive rank-IC fraction: 0.5606.
+Forecasts: 3,289 symbol-months across 126 signal months. Mean rank IC: 0.0075; positive rank-IC fraction: 0.5714.
 
 Model ID: `75% existing composite + 25% Chronos rank`. Package versions: `{"chronos-forecasting": "2.3.1", "timesfm": "2.0.2", "torch": "2.5.1+cpu"}`.
 Errors/skips: 0.
 ### composite_chronos_blend_50
 
-Forecasts: 1,794 symbol-months across 66 signal months. Mean rank IC: 0.0098; positive rank-IC fraction: 0.5758.
+Forecasts: 3,289 symbol-months across 126 signal months. Mean rank IC: 0.0204; positive rank-IC fraction: 0.5635.
 
 Model ID: `50% existing composite + 50% Chronos rank`. Package versions: `{"chronos-forecasting": "2.3.1", "timesfm": "2.0.2", "torch": "2.5.1+cpu"}`.
 Errors/skips: 0.
 ### composite_chronos_blend_75
 
-Forecasts: 1,794 symbol-months across 66 signal months. Mean rank IC: 0.0163; positive rank-IC fraction: 0.5303.
+Forecasts: 3,289 symbol-months across 126 signal months. Mean rank IC: 0.0369; positive rank-IC fraction: 0.5635.
 
 Model ID: `25% existing composite + 75% Chronos rank`. Package versions: `{"chronos-forecasting": "2.3.1", "timesfm": "2.0.2", "torch": "2.5.1+cpu"}`.
 Errors/skips: 0.
@@ -216,8 +216,8 @@ Errors/skips: 0.
 Install CPU PyTorch first, then the optional packages. For Kronos, clone the official repository and pass its path with `--kronos-repo`.
 
 ```bash
-python3 -m src.foundation_research --models all
-python3 -m src.foundation_research --models chronos --max-signals 1
+python3 -m src.foundation_research --models all --start 2016-01-01 --end 2026-08-11 --kronos-repo /tmp/Kronos
+python3 -m src.foundation_research --models chronos --start 2016-01-01 --end 2026-08-11 --max-signals 1
 ```
 
 Metrics are written to `reports/foundation_model_metrics.csv`, cost/block diagnostics to `reports/foundation_model_robustness.csv`, rolling diagnostics to `reports/foundation_model_rolling.csv`, and this report to `reports/foundation_model_findings.md`.
