@@ -65,6 +65,8 @@ The requested financial/time-series foundation models are optional because their
 
 Chronos, TimesFM, and Kronos should be added only through a separate run that records exact model IDs, package versions, context length, forecast horizon, and download date. A foundation-model forecast must pass the same expanding-window, next-month, transaction-cost, and holdout protocol before it can be compared with these results.
 
+The completed zero-shot rolling comparison is in `reports/foundation_model_findings.md` and is reproduced with `python3 -m src.foundation_research` in the CPU foundation environment.
+
 ## Limitations
 
 - The IDX30 snapshot is a current-universe panel and therefore has survivorship and index-membership look-ahead bias.

@@ -67,6 +67,22 @@ inverse-volatility variant, and the existing composite control. The report
 links the source papers and records validation/holdout results; it does not
 claim that any result is a live edge.
 
+The foundation-model runner executes real zero-shot rolling forecasts from
+Chronos, TimesFM, and Kronos in a separate heavyweight CPU environment:
+
+```bash
+python3 -m venv /tmp/beat-market-foundation
+/tmp/beat-market-foundation/bin/python -m pip install -r requirements-foundation-cpu.txt
+git clone https://github.com/shiyu-coder/Kronos.git /tmp/Kronos
+PYTHONPATH=$PWD:/tmp/Kronos /tmp/beat-market-foundation/bin/python -m src.foundation_research \
+  --models all --kronos-repo /tmp/Kronos
+```
+
+The checked-in foundation report uses fixed model IDs, 256 daily context rows,
+a 21-day horizon, top-three selection, 25 bps costs, and 2021–2026 rolling
+signals. It keeps holdout data out of model selection. See
+`reports/foundation_model_findings.md` for the actual comparison.
+
 Refresh the official catalog and, when a full quote snapshot is intended, use:
 
 ```bash

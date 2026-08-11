@@ -1,0 +1,9 @@
+-r requirements-ml.txt
+
+# Linux CPU environment used for the checked-in foundation-model run.
+--extra-index-url https://download.pytorch.org/whl/cpu
+torch==2.5.1+cpu
+chronos-forecasting==2.3.1
+timesfm==2.0.2
+
+# Kronos is loaded from its official repository checkout; see README.md.

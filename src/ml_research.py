@@ -7,11 +7,10 @@ The default model set is fixed before a run: a regularized linear model, a
 shallow gradient-boosted tree model, their equal-weight ensemble, and the same
 ensemble with inverse-volatility exposure control.
 
-Chronos, TimesFM, and Kronos are reported as optional foundation-model
-adapters. They are not imported at module load time because their packages and
-model weights are intentionally not dependencies of the reproducible baseline.
-Use ``--foundation-status`` to record whether their optional environments are
-available before adding them to a separately audited run.
+Chronos, TimesFM, and Kronos are evaluated by the separate
+``src.foundation_research`` runner. They are not imported at module load time
+because their packages and model weights are intentionally not dependencies of
+the reproducible baseline. Use that runner for actual zero-shot forecasts.
 """
 
 from __future__ import annotations
@@ -467,6 +466,8 @@ The requested financial/time-series foundation models are optional because their
 {foundation_lines}
 
 Chronos, TimesFM, and Kronos should be added only through a separate run that records exact model IDs, package versions, context length, forecast horizon, and download date. A foundation-model forecast must pass the same expanding-window, next-month, transaction-cost, and holdout protocol before it can be compared with these results.
+
+The completed zero-shot rolling comparison is in `reports/foundation_model_findings.md` and is reproduced with `python3 -m src.foundation_research` in the CPU foundation environment.
 
 ## Limitations
 
