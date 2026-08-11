@@ -47,6 +47,15 @@ reports/*.md
 !reports/all_stock_ml_training.csv
 !reports/all_stock_ml_summary.json
 !reports/all_stock_ml_sensitivity.csv
+!reports/liquid_rank_ml_findings.md
+!reports/liquid_rank_ml_metrics.csv
+!reports/liquid_rank_ml_bootstrap.csv
+!reports/liquid_rank_ml_robustness.csv
+!reports/liquid_rank_ml_rolling.csv
+!reports/liquid_rank_ml_rolling_summary.csv
+!reports/liquid_rank_ml_sensitivity.csv
+!reports/liquid_rank_ml_training.csv
+!reports/liquid_rank_ml_summary.json
 web/node_modules/
 web/dist/
 web/.vite/

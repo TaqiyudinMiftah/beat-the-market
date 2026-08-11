@@ -85,6 +85,22 @@ rolling windows, and bootstrap diagnostics. The catalog is a current snapshot,
 not a point-in-time universe; its results are exploratory and are not promoted
 to the app or live trading.
 
+The stricter follow-up applies the official [IDX80/LQ45/IDX30 methodology](https://www.idx.id/media/i2sd4vsk/appendix-index-guide-methodology-idx80-lq45-and-idx30.pdf)
+as a design constraint: it uses trailing 60-day dollar-volume caps of 150, 300,
+500, and all eligible names, then compares raw-return and cross-sectional
+rank-target Ridge/LightGBM models in expanding walk-forward tests. Its fixed
+gate also checks costs, rolling windows, bootstrap uncertainty, beta, drawdown,
+and turnover:
+
+```bash
+PYTHONPATH=$PWD /tmp/beat-market-ml-venv/bin/python -m src.liquid_rank_ml_research
+```
+
+See `reports/liquid_rank_ml_findings.md` for the full audit. The current
+exploratory survivor is `cap300_rank_ridge`; it is not a live recommendation,
+and the current catalog still cannot remove survivorship or historical
+membership bias.
+
 The foundation-model runner executes real zero-shot rolling forecasts from
 Chronos, TimesFM, and Kronos in a separate heavyweight CPU environment:
 
