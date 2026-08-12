@@ -9,8 +9,9 @@ Lockbox: 2026-01-01 through 2026-08-11; completed observations: 6<br>
 
 This report is a strict newest-data check, not another model-selection sweep.
 It compares the previously generated causal panels from the paper-style MLP,
-zero-shot Chronos-2, and annually refit Chronos-2. The 2026 period was not
-used to choose their architecture, seeds, forecast tail, or portfolio rule.
+zero-shot Chronos-2, annually refit Chronos-2, and all-listed TimesFM. The
+2026 period was not used to choose their architecture, seeds, forecast tail, or
+portfolio rule.
 
 ## Results
 
@@ -20,6 +21,7 @@ used to choose their architecture, seeds, forecast tail, or portfolio rule.
 | mlp_rank | 0.1980 | 0.5226 | 0.6209 | 0.4886 | 6 | 0.3168 | -0.0712 |
 | chronos2_zero_shot_lower10 | 0.0715 | 0.3782 | 0.0807 | 1.1697 | 6 | 6.0738 | 0.0000 |
 | chronos2_annual_ft_lower10 | -0.0332 | 0.1035 | 0.1385 | 1.1319 | 6 | 6.7624 | 0.0000 |
+| timesfm_all_daily_abs_point | -0.3303 | -0.4655 | 9.2902 | 0.2035 | 6 | 0.0248 | -0.2214 |
 
 Validation winner under the fixed Sharpe-then-excess rule: **mlp_rank**. Descriptive 2026 lockbox winner: **chronos2_annual_ft_lower10**. The lockbox winner is not promoted because it contains only six completed monthly observations.
 
@@ -33,6 +35,7 @@ still requires a longer future sample and a point-in-time universe.
 - `mlp_rank`: `/home/taqiyudinmiftah/beat-the-market/reports/all_stock_deep_forecasts.csv` (`mlp_rank`)
 - `chronos2_zero_shot_lower10`: `/home/taqiyudinmiftah/beat-the-market/reports/chronos2_daily_forecasts.csv` (`chronos2_daily_abs_cross_lower10`)
 - `chronos2_annual_ft_lower10`: `/home/taqiyudinmiftah/beat-the-market/reports/chronos2_finetune_walkforward_forecasts.csv` (`chronos2_ft_cross_lower10`)
+- `timesfm_all_daily_abs_point`: `/home/taqiyudinmiftah/beat-the-market/reports/timesfm_all_forecasts.csv` (`timesfm_daily_abs_point`)
 
 The source runners must be executed before this replay. Committed outputs are
 `lockbox_metrics.csv`, `lockbox_costs.csv`,
