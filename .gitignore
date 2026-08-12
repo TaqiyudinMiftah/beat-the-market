@@ -205,6 +205,16 @@ reports/*.md
 !reports/chronos2_finetune_walkforward_training.csv
 !reports/chronos2_finetune_walkforward_training_series.csv
 !reports/chronos2_finetune_walkforward_summary.json
+!reports/timesfm_all_findings.md
+!reports/timesfm_all_metrics.csv
+!reports/timesfm_all_bootstrap.csv
+!reports/timesfm_all_robustness.csv
+!reports/timesfm_all_rolling.csv
+!reports/timesfm_all_rolling_summary.csv
+!reports/timesfm_all_sensitivity.csv
+!reports/timesfm_all_context.csv
+!reports/timesfm_all_training.csv
+!reports/timesfm_all_summary.json
 !reports/lockbox_findings.md
 !reports/lockbox_metrics.csv
 !reports/lockbox_costs.csv

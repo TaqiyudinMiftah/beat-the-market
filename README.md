@@ -304,6 +304,22 @@ positive rolling windows, and a 0.62% bootstrap lower bound, but the overall
 validation winner was the unstable median variant. Under the conservative
 selection rule, no Chronos fine-tuned model is promoted.
 
+The all-listed TimesFM follow-up applies Google Research TimesFM 2.5 to the
+same top-300 daily panel, with fixed point and lower-tail forecasts on absolute
+and last-price-normalized log prices:
+
+```bash
+HF_HOME=/tmp/beat-market-hf PYTHONPATH=$PWD \
+  /tmp/beat-market-ml-venv/bin/python -m src.timesfm_all_stock_research
+```
+
+All four TimesFM variants failed the fixed audit gate. The validation-selected
+TimesFM point variant had -33.03% validation excess CAGR and -46.55% 2024
+excess before a 345.66% 2025–2026 rebound, which is unstable across regimes
+rather than evidence of a future edge. See `reports/timesfm_all_findings.md`.
+The TimesFM forecast is retained as a documented negative result and is not
+promoted.
+
 The newest-data lockbox replay evaluates those frozen forecast panels on the
 six completed monthly observations from January through July 2026 (the local
 data snapshot ends 11 August). It performs no fitting or model selection and

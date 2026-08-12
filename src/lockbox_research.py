@@ -46,6 +46,10 @@ SOURCE_SPECS = {
         "chronos2_finetune_walkforward_forecasts.csv",
         "chronos2_ft_cross_lower10",
     ),
+    "timesfm_all_daily_abs_point": (
+        "timesfm_all_forecasts.csv",
+        "timesfm_daily_abs_point",
+    ),
 }
 
 
@@ -289,8 +293,9 @@ Lockbox: {args.lockbox_start} through {args.end}; completed observations: {metri
 
 This report is a strict newest-data check, not another model-selection sweep.
 It compares the previously generated causal panels from the paper-style MLP,
-zero-shot Chronos-2, and annually refit Chronos-2. The 2026 period was not
-used to choose their architecture, seeds, forecast tail, or portfolio rule.
+zero-shot Chronos-2, annually refit Chronos-2, and all-listed TimesFM. The
+2026 period was not used to choose their architecture, seeds, forecast tail, or
+portfolio rule.
 
 ## Results
 
