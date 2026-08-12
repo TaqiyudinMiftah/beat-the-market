@@ -1,0 +1,17 @@
+model,cap,target,signals,forecast_rows,median_training_rows
+cap150_raw_ridge,150,raw,119,16450,9355.0
+cap150_raw_lightgbm,150,raw,119,16450,9355.0
+cap150_rank_ridge,150,rank,119,16450,9355.0
+cap150_rank_lightgbm,150,rank,119,16450,9355.0
+cap300_raw_ridge,300,raw,123,33752,17946.0
+cap300_raw_lightgbm,300,raw,123,33752,17946.0
+cap300_rank_ridge,300,rank,123,33752,17946.0
+cap300_rank_lightgbm,300,rank,123,33752,17946.0
+cap500_raw_ridge,500,raw,124,57131,29609.5
+cap500_raw_lightgbm,500,raw,124,57131,29609.5
+cap500_rank_ridge,500,rank,124,57131,29609.5
+cap500_rank_lightgbm,500,rank,124,57131,29609.5
+capall_raw_ridge,0,raw,124,80117,32919.0
+capall_raw_lightgbm,0,raw,124,80117,32919.0
+capall_rank_ridge,0,rank,124,80117,32919.0
+capall_rank_lightgbm,0,rank,124,80117,32919.0

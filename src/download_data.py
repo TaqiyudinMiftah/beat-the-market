@@ -1,4 +1,4 @@
-"""Download cached daily OHLCV data for the current IDX30 research universe.
+"""Download cached daily OHLCV data for an IDX research or catalog universe.
 
 The downloader deliberately uses Yahoo Finance's chart endpoint directly so the
 research can be reproduced without a vendor-specific Python package. It is not
@@ -10,7 +10,7 @@ from __future__ import annotations
 import argparse
 import json
 import time
-from datetime import date, datetime, timedelta, timezone
+from datetime import date, datetime, timezone
 from pathlib import Path
 from urllib.parse import quote
 
@@ -20,6 +20,7 @@ import requests
 
 ROOT = Path(__file__).resolve().parents[1]
 UNIVERSE_PATH = ROOT / "data" / "universe_idx30_2026-08.csv"
+ALL_UNIVERSE_PATH = ROOT / "data" / "universe_idx_all_2026-08.csv"
 OUT_DIR = ROOT / "data" / "raw" / "yahoo"
 METADATA_PATH = ROOT / "data" / "raw" / "yahoo_metadata.json"
 
@@ -34,6 +35,29 @@ def parse_args() -> argparse.Namespace:
     )
     parser.add_argument("--sleep", type=float, default=0.35, help="Seconds between requests")
     parser.add_argument("--force", action="store_true", help="Redownload existing files")
+    parser.add_argument(
+        "--universe",
+        choices=("idx30", "all"),
+        default="idx30",
+        help="Download the IDX30 research universe or all listed IDX stocks (about 962 symbols)",
+    )
+    parser.add_argument(
+        "--output-dir",
+        type=Path,
+        default=OUT_DIR,
+        help="Directory for downloaded CSV files; use a separate directory for all-stock experiments",
+    )
+    parser.add_argument(
+        "--metadata-path",
+        type=Path,
+        default=METADATA_PATH,
+        help="Path for the refresh manifest",
+    )
+    parser.add_argument(
+        "--continue-on-error",
+        action="store_true",
+        help="Record unavailable symbols and continue downloading the remaining universe",
+    )
     return parser.parse_args()
 
 
@@ -100,6 +124,65 @@ def fetch_chart(
     raise RuntimeError(f"Could not download {ticker} ({yahoo_ticker}): {'; '.join(errors)}")
 
 
+def _universe_path(universe: str) -> Path:
+    if universe == "idx30":
+        return UNIVERSE_PATH
+    if universe == "all":
+        if not ALL_UNIVERSE_PATH.exists():
+            raise FileNotFoundError(
+                f"Missing {ALL_UNIVERSE_PATH}; run `python3 src/update_universe.py` first"
+            )
+        return ALL_UNIVERSE_PATH
+    raise ValueError(f"Unsupported universe: {universe}")
+
+
+def download_universe(
+    start: str = "2015-01-01",
+    end: str = "2026-08-12",
+    sleep_seconds: float = 0.35,
+    universe: str = "idx30",
+    output_dir: Path = OUT_DIR,
+    metadata_path: Path = METADATA_PATH,
+) -> dict[str, object]:
+    """Refresh the configured universe and return a compact refresh manifest."""
+    universe_path = _universe_path(universe)
+    universe_frame = pd.read_csv(universe_path)
+    tickers = ["^JKSE", *universe_frame["ticker"].tolist()]
+    output_dir.mkdir(parents=True, exist_ok=True)
+    session = requests.Session()
+    session.headers.update({"User-Agent": "beat-the-market research/0.1"})
+    downloaded: list[dict[str, object]] = []
+    for ticker in tickers:
+        output_path = output_dir / filename_for(ticker)
+        frame = fetch_chart(session, ticker, start, end)
+        frame.to_csv(output_path, index=False, date_format="%Y-%m-%d")
+        downloaded.append(
+            {
+                "ticker": ticker,
+                "file": str(output_path.relative_to(ROOT)),
+                "rows": int(len(frame)),
+                "first_date": str(frame["date"].min().date()),
+                "last_date": str(frame["date"].max().date()),
+                "status": "downloaded",
+            }
+        )
+        time.sleep(max(sleep_seconds, 0.0))
+    metadata = {
+        "source": "Yahoo Finance chart API",
+        "source_url_template": "https://query2.finance.yahoo.com/v8/finance/chart/{ticker}",
+        "downloaded_at_utc": datetime.now(timezone.utc).isoformat(),
+        "requested_start": start,
+        "requested_end_exclusive": end,
+        "benchmark": "^JKSE",
+        "universe": universe,
+        "universe_file": str(universe_path.relative_to(ROOT)),
+        "files": downloaded,
+    }
+    metadata_path.parent.mkdir(parents=True, exist_ok=True)
+    metadata_path.write_text(json.dumps(metadata, indent=2), encoding="utf-8")
+    return metadata
+
+
 def main() -> None:
     args = parse_args()
     start = date.fromisoformat(args.start)
@@ -107,21 +190,42 @@ def main() -> None:
     if end <= start:
         raise SystemExit("--end must be after --start")
 
-    universe = pd.read_csv(UNIVERSE_PATH)
+    universe_path = _universe_path(args.universe)
+    universe = pd.read_csv(universe_path)
     tickers = ["^JKSE", *universe["ticker"].tolist()]
-    OUT_DIR.mkdir(parents=True, exist_ok=True)
+    output_dir = args.output_dir.resolve()
+    metadata_path = args.metadata_path.resolve()
+    output_dir.mkdir(parents=True, exist_ok=True)
     session = requests.Session()
     session.headers.update({"User-Agent": "beat-the-market research/0.1"})
     downloaded: list[dict[str, object]] = []
 
     for index, ticker in enumerate(tickers, start=1):
-        output_path = OUT_DIR / filename_for(ticker)
+        output_path = output_dir / filename_for(ticker)
         if output_path.exists() and not args.force:
             frame = pd.read_csv(output_path, parse_dates=["date"])
             status = "cached"
         else:
             print(f"[{index}/{len(tickers)}] downloading {ticker}", flush=True)
-            frame = fetch_chart(session, ticker, args.start, args.end)
+            try:
+                frame = fetch_chart(session, ticker, args.start, args.end)
+            except Exception as exc:
+                if not args.continue_on_error:
+                    raise
+                print(f"  failed: {type(exc).__name__}: {exc}", flush=True)
+                downloaded.append(
+                    {
+                        "ticker": ticker,
+                        "file": str(output_path.relative_to(ROOT)),
+                        "rows": 0,
+                        "first_date": None,
+                        "last_date": None,
+                        "status": "failed",
+                        "error": f"{type(exc).__name__}: {exc}",
+                    }
+                )
+                time.sleep(max(args.sleep, 0.0))
+                continue
             frame.to_csv(output_path, index=False, date_format="%Y-%m-%d")
             status = "downloaded"
             time.sleep(max(args.sleep, 0.0))
@@ -144,11 +248,13 @@ def main() -> None:
         "requested_start": args.start,
         "requested_end_exclusive": args.end,
         "benchmark": "^JKSE",
-        "universe_file": str(UNIVERSE_PATH.relative_to(ROOT)),
+        "universe": args.universe,
+        "universe_file": str(universe_path.relative_to(ROOT)),
         "files": downloaded,
     }
-    METADATA_PATH.write_text(json.dumps(metadata, indent=2), encoding="utf-8")
-    print(f"Wrote metadata to {METADATA_PATH.relative_to(ROOT)}")
+    metadata_path.parent.mkdir(parents=True, exist_ok=True)
+    metadata_path.write_text(json.dumps(metadata, indent=2), encoding="utf-8")
+    print(f"Wrote metadata to {metadata_path.relative_to(ROOT)}")
 
 
 if __name__ == "__main__":

@@ -1,0 +1,4 @@
+source,signals,forecast_rows,tickers_min,tickers_median,tickers_max
+cap150,90,12339,125,137.0,146
+cap300,90,24383,253,269.0,294
+cap500,90,41258,432,457.0,490

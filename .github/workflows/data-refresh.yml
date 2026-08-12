@@ -1,0 +1,22 @@
+name: Refresh market snapshot
+
+on:
+  workflow_dispatch:
+  schedule:
+    # 18:00 WIB on weekdays, after the Indonesian session has settled.
+    - cron: "0 11 * * 1-5"
+
+jobs:
+  refresh:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Trigger protected API refresh
+        env:
+          API_URL: ${{ secrets.API_URL }}
+          REFRESH_TOKEN: ${{ secrets.REFRESH_TOKEN }}
+        run: |
+          test -n "$API_URL"
+          test -n "$REFRESH_TOKEN"
+          curl --fail --retry 3 --retry-delay 10 \
+            -X POST "$API_URL/api/admin/refresh" \
+            -H "X-Refresh-Token: $REFRESH_TOKEN"
